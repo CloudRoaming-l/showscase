@@ -6,6 +6,7 @@ import photoRoutes from './routes/photoRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import authRoutes, { ensureDefaultAdmin } from './routes/authRoutes.js';
 import activityLogRoutes from './routes/activityLogRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { paginationValidator, searchSanitizer } from './middleware/validate.js';
 
 dotenv.config();
@@ -38,7 +39,9 @@ const allowedOrigins = rawOrigin
 app.use(
   cors({
     origin: (origin, callback) => {
-      // 允许无 origin 的请求（如 curl / postman），但生产环境可改为更严格策略
+      // 开发环境允许所有来源，方便内网穿透调试
+      if (NODE_ENV !== 'production') return callback(null, true);
+      // 允许无 origin 的请求（如 curl / postman）
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error('Not allowed by CORS'));
@@ -73,6 +76,7 @@ app.use('/api/photos', photoRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
+app.use('/api/users', userRoutes);
 
 // —— 404 兜底 ——
 app.use('/api', (req, res) => {

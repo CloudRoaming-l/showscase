@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Lock, User, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { Image, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../components/common/Toast.jsx';
 import { authAPI } from '../../services/api.js';
@@ -111,13 +111,6 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p className="flex items-center justify-center gap-2">
-              <AlertTriangle size={14} />
-              默认账号：admin / admin123
-            </p>
-          </div>
         </div>
       </div>
     </div>

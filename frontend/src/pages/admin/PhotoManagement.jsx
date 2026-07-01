@@ -3,6 +3,7 @@ import { Search, Edit, Trash2, Eye, Plus, RefreshCw, X, Save, Upload, Star, Star
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import PhotoLightbox from '../../components/gallery/PhotoLightbox.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
+import Pagination from '../../components/common/Pagination.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { photoAPI, studentAPI, isAuthError } from '../../services/api.js';
 import { exportPhotos } from '../../utils/exportData.js';
@@ -29,6 +30,8 @@ export default function PhotoManagement() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importData, setImportData] = useState('');
   const [importResult, setImportResult] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const toast = useToast();
   const [formData, setFormData] = useState({
     _id: null,
@@ -145,6 +148,7 @@ export default function PhotoManagement() {
 
   const handleSearch = (value) => {
     setSearchTerm(value);
+    setPage(1);
     setTimeout(() => loadData(), 300);
   };
 
@@ -155,6 +159,20 @@ export default function PhotoManagement() {
       (p.author && p.author.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchSearch;
   });
+
+  const totalPages = Math.ceil(filteredPhotos.length / pageSize) || 1;
+  const paginatedPhotos = filteredPhotos.slice((page - 1) * pageSize, page * pageSize);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    setSelectedIds(new Set());
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(1);
+    setSelectedIds(new Set());
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -309,10 +327,10 @@ export default function PhotoManagement() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredPhotos.length) {
+    if (selectedIds.size === paginatedPhotos.length && paginatedPhotos.length > 0) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredPhotos.map(p => p.id || p._id)));
+      setSelectedIds(new Set(paginatedPhotos.map(p => p.id || p._id)));
     }
   };
 
@@ -534,7 +552,7 @@ export default function PhotoManagement() {
                     </td>
                   </tr>
                 ) : (
-                  filteredPhotos.map((photo) => (
+                  paginatedPhotos.map((photo) => (
                     <tr key={photo.id || photo._id} className="hover:bg-gray-800/30 transition-colors">
                       <td className="px-4 py-3">
                         <button onClick={() => toggleSelect(photo.id || photo._id)} className="text-gray-400 hover:text-white transition-colors">
@@ -597,6 +615,14 @@ export default function PhotoManagement() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={filteredPhotos.length}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         </div>
       </div>
 

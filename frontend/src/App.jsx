@@ -6,11 +6,13 @@ import Footer from './components/layout/Footer.jsx';
 import ParticleBackground from './components/effects/ParticleBackground.jsx';
 import Home from './pages/Home.jsx';
 import Gallery from './pages/Gallery.jsx';
+import DashboardShowcase from './pages/DashboardShowcase.jsx';
 import Author from './pages/Author.jsx';
 import Login from './pages/admin/Login.jsx';
 import Dashboard from './pages/admin/Dashboard.jsx';
 import PhotoManagement from './pages/admin/PhotoManagement.jsx';
 import StudentManagement from './pages/admin/StudentManagement.jsx';
+import UserManagement from './pages/admin/UserManagement.jsx';
 import ActivityLogManagement from './pages/admin/ActivityLogManagement.jsx';
 import Settings from './pages/admin/Settings.jsx';
 import { hasValidToken, clearAuth } from './services/api.js';
@@ -49,6 +51,7 @@ export default function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/gallery" element={<Gallery />} />
+                    <Route path="/showcase" element={<DashboardShowcase />} />
                     <Route path="/author" element={<Author />} />
                   </Routes>
                 </main>
@@ -89,6 +92,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <StudentManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <UserManagement />
               </ProtectedRoute>
             }
           />

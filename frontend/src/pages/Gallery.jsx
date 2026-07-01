@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Grid, Filter, Search, X, Heart, Star, Plus } from 'lucide-react';
+import { Grid, Filter, Search, X, Heart, Star } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import PhotoCard from '../components/gallery/PhotoCard.jsx';
 import PhotoLightbox from '../components/gallery/PhotoLightbox.jsx';
-import { useToast } from '../components/common/Toast.jsx';
-import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
 import { photoAPI } from '../services/api.js';
 import { getFavorites } from '../utils/interaction';
 import { CATEGORIES } from '../utils/sharedData.js';
@@ -24,8 +22,6 @@ export default function Gallery() {
     { id: 'all', name: '全部作品' },
     ...CATEGORIES.map((cat) => ({ id: cat, name: cat }))
   ]);
-  const [submitForm, setSubmitForm] = useState({ show: false });
-  const toast = useToast();
 
   const PAGE_SIZE = 20;
 
@@ -149,55 +145,15 @@ export default function Gallery() {
     if (idx < filteredPhotos.length - 1) setSelectedPhoto(filteredPhotos[idx + 1]);
   }, [filteredPhotos, selectedPhoto]);
 
-  const [submitData, setSubmitData] = useState({
-    title: '',
-    author: '',
-    description: '',
-    category: CATEGORIES[0],
-    imageUrl: ''
-  });
-
-  const handleSubmitPhoto = async () => {
-    if (!submitData.title || !submitData.author || !submitData.imageUrl) {
-      toast.error('请填写作品名称、作者和图片链接');
-      return;
-    }
-
-    try {
-      await photoAPI.createPhoto({
-        title: submitData.title,
-        author: submitData.author,
-        description: submitData.description,
-        category: submitData.category,
-        imageUrl: submitData.imageUrl,
-        isFeatured: false
-      });
-      toast.success('作品提交成功，感谢您的分享！');
-      setSubmitForm({ show: false });
-      setSubmitData({ title: '', author: '', description: '', category: CATEGORIES[0], imageUrl: '' });
-      // 刷新列表
-      loadData();
-    } catch (err) {
-      toast.error('作品提交失败，请稍后重试');
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div className="flex flex-wrap items-center gap-4 mb-4">
           <div className="flex items-center space-x-3">
             <Grid size={28} className="text-primary-400" />
             <h1 className="text-3xl md:text-4xl font-bold">作品展示</h1>
             <span className="text-gray-500 text-lg">（{filteredPhotos.length} 个作品）</span>
           </div>
-          <button
-            onClick={() => setSubmitForm({ show: true })}
-            className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white rounded-lg shadow-lg shadow-primary-500/30 transition-all"
-          >
-            <Plus size={18} />
-            <span>提交作品</span>
-          </button>
         </div>
         <p className="text-gray-400">浏览优秀学生作品，感受孩子们的创造力</p>
       </div>
@@ -416,105 +372,6 @@ export default function Gallery() {
         />
       )}
 
-      {/* 提交作品弹窗 */}
-      {submitForm.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="card p-6 max-w-lg w-full border border-gray-700">
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500">
-                  <Plus size={20} className="text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">提交作品</h3>
-              </div>
-              <button
-                onClick={() => setSubmitForm({ show: false })}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">作品名称 *</label>
-                <input
-                  type="text"
-                  value={submitData.title}
-                  onChange={(e) => setSubmitData({ ...submitData, title: e.target.value })}
-                  placeholder="请输入作品名称"
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">作者 *</label>
-                <input
-                  type="text"
-                  value={submitData.author}
-                  onChange={(e) => setSubmitData({ ...submitData, author: e.target.value })}
-                  placeholder="请输入作者姓名"
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">分类 *</label>
-                <select
-                  value={submitData.category}
-                  onChange={(e) => setSubmitData({ ...submitData, category: e.target.value })}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-primary-500 transition-colors"
-                >
-                  {categories.slice(1).map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">图片链接 *</label>
-                <input
-                  type="url"
-                  value={submitData.imageUrl}
-                  onChange={(e) => setSubmitData({ ...submitData, imageUrl: e.target.value })}
-                  placeholder="请输入作品图片的 URL（可使用 https://picsum.photos/随机 占位）"
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">可以使用 https://picsum.photos/800/600?random=1 做测试</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">作品描述</label>
-                <textarea
-                  rows={3}
-                  value={submitData.description}
-                  onChange={(e) => setSubmitData({ ...submitData, description: e.target.value })}
-                  placeholder="请简要描述作品（可选）"
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex space-x-3 justify-end mt-6">
-              <button
-                onClick={() => setSubmitForm({ show: false })}
-                className="px-5 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-              >
-                取消
-              </button>
-              <button
-                onClick={handleSubmitPhoto}
-                className="px-5 py-2 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white rounded-lg transition-colors shadow-lg shadow-primary-500/30"
-              >
-                提交作品
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

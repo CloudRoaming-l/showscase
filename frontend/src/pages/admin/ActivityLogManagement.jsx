@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, RefreshCw, Filter, Clock, User, FileText, Image, Trash2, CheckCircle, XCircle, AlertCircle, Download, ChevronDown } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
+import Pagination from '../../components/common/Pagination.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { activityLogAPI, isAuthError } from '../../services/api.js';
 
@@ -43,18 +44,25 @@ export default function ActivityLogManagement() {
   const [actionFilter, setActionFilter] = useState('all');
   const [targetFilter, setTargetFilter] = useState('all');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
     loadData();
-  }, [page, actionFilter, targetFilter]);
+  }, [page, pageSize, actionFilter, targetFilter]);
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(1);
+  };
 
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const params = { page, limit: 30 };
+      const params = { page, limit: pageSize };
       if (actionFilter !== 'all') params.action = actionFilter;
       if (targetFilter !== 'all') params.targetType = targetFilter;
       if (searchTerm) params.operator = searchTerm;
@@ -67,6 +75,7 @@ export default function ActivityLogManagement() {
       setLogs(logsResult.data || []);
       setStats(statsResult.data || { total: 0, today: 0, byAction: [], byTargetType: [] });
       setTotalPages(logsResult.pagination?.pages || 1);
+      setTotalItems(logsResult.pagination?.total || logsResult.data?.length || 0);
     } catch (error) {
       if (isAuthError(error)) return;
       console.error('加载数据失败:', error);
@@ -285,30 +294,15 @@ export default function ActivityLogManagement() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+          />
         </div>
-
-        {/* 分页 */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center space-x-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-4 py-2 bg-gray-800/60 text-gray-300 rounded-lg disabled:opacity-30 hover:bg-gray-700 hover:text-white transition-colors"
-            >
-              上一页
-            </button>
-            <span className="text-gray-400 text-sm">
-              第 {page} / {totalPages} 页
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-4 py-2 bg-gray-800/60 text-gray-300 rounded-lg disabled:opacity-30 hover:bg-gray-700 hover:text-white transition-colors"
-            >
-              下一页
-            </button>
-          </div>
-        )}
       </div>
     </AdminLayout>
   );

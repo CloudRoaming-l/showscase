@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, Plus, RefreshCw, User, X, Save, ImageIcon } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
+import Pagination from '../../components/common/Pagination.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { photoAPI, studentAPI, isAuthError } from '../../services/api.js';
 
@@ -13,6 +14,8 @@ export default function StudentManagement() {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const toast = useToast();
   const [formData, setFormData] = useState({
     _id: null,
@@ -55,6 +58,23 @@ export default function StudentManagement() {
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.className && s.className.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const totalPages = Math.ceil(filteredStudents.length / pageSize) || 1;
+  const paginatedStudents = filteredStudents.slice((page - 1) * pageSize, page * pageSize);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(1);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -135,7 +155,7 @@ export default function StudentManagement() {
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="搜索学生姓名或班级..."
               className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
             />
@@ -196,7 +216,7 @@ export default function StudentManagement() {
                     </td>
                   </tr>
                 ) : (
-                  filteredStudents.map((student) => (
+                  paginatedStudents.map((student) => (
                     <tr key={student._id || student.id} className="hover:bg-gray-800/30 transition-colors">
                       <td className="px-5 py-3">
                         <div className="flex items-center space-x-3">
@@ -241,6 +261,14 @@ export default function StudentManagement() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={filteredStudents.length}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         </div>
       </div>
 

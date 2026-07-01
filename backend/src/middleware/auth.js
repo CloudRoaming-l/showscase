@@ -33,4 +33,14 @@ export function authMiddleware(req, res, next) {
   }
 }
 
+export function adminRequired(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({
+      status: 'error',
+      message: '权限不足，需要管理员权限'
+    });
+  }
+  next();
+}
+
 export default authMiddleware;

@@ -179,6 +179,47 @@ export const activityLogAPI = {
   getStats: async () => api.get('/activity-logs/stats')
 };
 
+// 用户管理 API
+export const userAPI = {
+  getUsers: async (params = {}) => {
+    const result = await api.get('/users', { params });
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+
+  getUser: async (id) => {
+    const result = await api.get(`/users/${id}`);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+
+  createUser: async (data) => {
+    const result = await api.post('/users', data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+
+  updateUser: async (id, data) => {
+    const result = await api.put(`/users/${id}`, data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+
+  resetPassword: async (id, password) => {
+    return api.put(`/users/${id}/password`, { password });
+  },
+
+  deleteUser: async (id) => api.delete(`/users/${id}`)
+};
+
 // 从响应错误中提取后端返回的错误消息
 function extractErrorMessage(error, fallback = '请求失败') {
   if (error.response && error.response.data) {

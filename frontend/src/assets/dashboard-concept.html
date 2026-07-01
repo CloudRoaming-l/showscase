@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>学生作品展示系统 - 数据大屏</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0f1a 0%, #1a1f3a 50%, #0d1225 100%);
+            color: #fff;
+            position: relative;
+        }
+
+        /* 粒子背景 */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 212, 255, 0.6);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1080px) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* 渐变遮罩 */
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        /* 网格线 */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        /* 顶部标题区 */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .header-title {
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            background: linear-gradient(90deg, #00d4ff, #8b5cf6, #00d4ff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 3s ease infinite;
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header-decoration {
+            position: absolute;
+            width: 300px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            bottom: 0;
+        }
+
+        .header-decoration.left { left: 200px; }
+        .header-decoration.right { right: 200px; }
+
+        /* 主容器 */
+        .main-container {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            padding: 30px 40px;
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            grid-template-rows: 200px 1fr;
+            gap: 30px;
+        }
+
+        /* 统计卡片区 */
+        .stats-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.1),
+                inset 0 0 20px rgba(0, 212, 255, 0.05);
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #8b5cf6);
+            box-shadow: 0 0 10px #00d4ff;
+        }
+
+        @keyframes breathe {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.1), inset 0 0 20px rgba(0, 212, 255, 0.05); }
+            50% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.2), inset 0 0 30px rgba(0, 212, 255, 0.1); }
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: rgba(224, 244, 255, 0.7);
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 40px;
+            height: 40px;
+            opacity: 0.3;
+        }
+
+        /* 图表区域 */
+        .chart-area {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #e0f4ff;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .chart-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .ring-chart {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .ring-chart svg {
+            transform: rotate(-90deg);
+        }
+
+        .ring-bg {
+            fill: none;
+            stroke: rgba(0, 212, 255, 0.1);
+            stroke-width: 12;
+        }
+
+        .ring-progress {
+            fill: none;
+            stroke: url(#ringGradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 345;
+            stroke-dashoffset: 86;
+            filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.6));
+        }
+
+        .ring-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .ring-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00d4ff;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .ring-label {
+            font-size: 12px;
+            color: rgba(224, 244, 255, 0.6);
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .legend-text {
+            font-size: 14px;
+            color: rgba(224, 244, 255, 0.8);
+        }
+
+        .legend-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: #00d4ff;
+            margin-left: auto;
+        }
+
+        /* 作品轮播区 */
+        .carousel-area {
+            grid-column: 2;
+            grid-row: 2;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 40px rgba(0, 212, 255, 0.1),
+                inset 0 0 60px rgba(0, 212, 255, 0.03);
+        }
+
+        .carousel-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .carousel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel-title {
+            font-size: 22px;
+            font-weight: 500;
+            color: #e0f4ff;
+            letter-spacing: 3px;
+        }
+
+        .carousel-nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+            padding: 10px 0;
+        }
+
+        .work-card {
+            flex: 0 0 calc(33.333% - 20px);
+            height: 320px;
+            background: linear-gradient(145deg, rgba(26, 31, 58, 0.8) 0%, rgba(13, 18, 37, 0.9) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .work-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 
+                0 8px 40px rgba(0, 212, 255, 0.2),
+                0 0 60px rgba(139, 92, 246, 0.1);
+        }
+
+        .work-image {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d3555 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .work-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .work-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            opacity: 0.3;
+        }
+
+        .work-info {
+            padding: 18px;
+        }
+
+        .work-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #e0f4ff;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .work-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .work-author {
+            font-size: 13px;
+            color: rgba(224, 244, 255, 0.6);
+        }
+
+        .work-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .badge-approved {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .badge-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        /* 底部区域 */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            background: linear-gradient(0deg, rgba(0, 212, 255, 0.05) 0%, transparent 100%);
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .datetime {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .date {
+            font-size: 18px;
+            font-weight: 500;
+            color: #e0f4ff;
+            letter-spacing: 2px;
+        }
+
+        .time {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            letter-spacing: 4px;
+        }
+
+        .slogan {
+            font-size: 20px;
+            color: rgba(224, 244, 255, 0.6);
+            letter-spacing: 6px;
+            font-weight: 300;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: rgba(224, 244, 255, 0.6);
+            letter-spacing: 2px;
+        }
+
+        /* 装饰元素 */
+        .corner-decoration {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            pointer-events: none;
+        }
+
+        .corner-decoration.top-left {
+            top: 110px;
+            left: 50px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-decoration.top-right {
+            top: 110px;
+            right: 50px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-decoration.bottom-left {
+            bottom: 90px;
+            left: 50px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-decoration.bottom-right {
+            bottom: 90px;
+            right: 50px;
+            border-left: none;
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景 -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- 渐变遮罩 -->
+    <div class="gradient-overlay"></div>
+    
+    <!-- 网格线 -->
+    <div class="grid-lines"></div>
+
+    <!-- 装饰角标 -->
+    <div class="corner-decoration top-left"></div>
+    <div class="corner-decoration top-right"></div>
+    <div class="corner-decoration bottom-left"></div>
+    <div class="corner-decoration bottom-right"></div>
+
+    <!-- 顶部标题 -->
+    <header class="header">
+        <div class="header-decoration left"></div>
+        <h1 class="header-title">学生作品展示系统</h1>
+        <div class="header-decoration right"></div>
+    </header>
+
+    <!-- 主容器 -->
+    <main class="main-container">
+        <!-- 统计卡片 -->
+        <div class="stats-area">
+            <div class="stat-card">
+                <div class="stat-label">作品总数</div>
+                <div class="stat-value">1,258</div>
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                </svg>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">待审核</div>
+                <div class="stat-value" style="color: #fbbf24;">32</div>
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">已通过</div>
+                <div class="stat-value" style="color: #22c55e;">1,186</div>
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">学生人数</div>
+                <div class="stat-value" style="color: #8b5cf6;">386</div>
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="chart-area">
+            <div class="chart-title">分类统计</div>
+            <div class="chart-content">
+                <div class="ring-chart">
+                    <svg width="140" height="140" viewBox="0 0 140 140">
+                        <defs>
+                            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#00d4ff"/>
+                                <stop offset="100%" stop-color="#8b5cf6"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="ring-bg" cx="70" cy="70" r="55"/>
+                        <circle class="ring-progress" cx="70" cy="70" r="55"/>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-value">75%</div>
+                        <div class="ring-label">通过率</div>
+                    </div>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #00d4ff; color: #00d4ff;"></div>
+                        <span class="legend-text">绘画作品</span>
+                        <span class="legend-value">486</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #8b5cf6; color: #8b5cf6;"></div>
+                        <span class="legend-text">手工制作</span>
+                        <span class="legend-value">312</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #22c55e; color: #22c55e;"></div>
+                        <span class="legend-text">摄影作品</span>
+                        <span class="legend-value">258</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #fbbf24; color: #fbbf24;"></div>
+                        <span class="legend-text">书法作品</span>
+                        <span class="legend-value">202</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 作品轮播区 -->
+        <div class="carousel-area">
+            <div class="carousel-header">
+                <div class="carousel-title">优秀作品展示</div>
+                <div class="carousel-nav">
+                    <button class="nav-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                    </button>
+                    <button class="nav-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="carousel-track">
+                <div class="work-card">
+                    <div class="work-image">
+                        <div class="work-placeholder">🎨</div>
+                    </div>
+                    <div class="work-info">
+                        <div class="work-title">春天的花园</div>
+                        <div class="work-meta">
+                            <span class="work-author">王小明 · 三年级</span>
+                            <span class="work-badge badge-approved">已通过</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="work-card">
+                    <div class="work-image">
+                        <div class="work-placeholder">✂️</div>
+                    </div>
+                    <div class="work-info">
+                        <div class="work-title">创意手工灯笼</div>
+                        <div class="work-meta">
+                            <span class="work-author">李思琪 · 二年级</span>
+                            <span class="work-badge badge-approved">已通过</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="work-card">
+                    <div class="work-image">
+                        <div class="work-placeholder">📷</div>
+                    </div>
+                    <div class="work-info">
+                        <div class="work-title">校园秋色</div>
+                        <div class="work-meta">
+                            <span class="work-author">张天宇 · 四年级</span>
+                            <span class="work-badge badge-pending">待审核</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部区域 -->
+    <footer class="footer">
+        <div class="datetime">
+            <div class="date" id="currentDate">2026年06月21日</div>
+            <div class="time" id="currentTime">14:30:00</div>
+        </div>
+        <div class="slogan">点燃创意 · 绽放梦想</div>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span class="status-text">系统运行中</span>
+        </div>
+    </footer>
+
+    <script>
+        // 生成粒子
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const dateStr = now.getFullYear() + '年' + 
+                String(now.getMonth() + 1).padStart(2, '0') + '月' + 
+                String(now.getDate()).padStart(2, '0') + '日';
+            const timeStr = String(now.getHours()).padStart(2, '0') + ':' + 
+                String(now.getMinutes()).padStart(2, '0') + ':' + 
+                String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('currentDate').textContent = dateStr;
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>

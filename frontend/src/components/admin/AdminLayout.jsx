@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Image,
@@ -9,26 +9,62 @@ import {
   X,
   Sparkles,
   ChevronRight,
-  Clock
+  Clock,
+  ExternalLink,
+  Home,
+  LayoutDashboard as DashboardIcon,
+  UserCog
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Navigate } from 'react-router-dom';
 import { useToast } from '../common/Toast.jsx';
-import { authAPI } from '../../services/api.js';
+import { authAPI, isAuthError } from '../../services/api.js';
 
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const toast = useToast();
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const result = await authAPI.getCurrentUser();
+      if (result.status === 'success') {
+        setCurrentUser(result.data);
+      }
+    } catch (error) {
+      if (!isAuthError(error)) {
+        console.error('获取用户信息失败:', error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isAdmin = currentUser?.role === 'admin';
 
   const navItems = [
     { name: '仪表盘', path: '/admin', icon: LayoutDashboard },
     { name: '作品管理', path: '/admin/photos', icon: Image },
     { name: '学生管理', path: '/admin/students', icon: Users },
-    { name: '操作日志', path: '/admin/activity-logs', icon: Clock },
+    ...(isAdmin ? [{ name: '账号管理', path: '/admin/users', icon: UserCog }] : []),
+    ...(isAdmin ? [{ name: '操作日志', path: '/admin/activity-logs', icon: Clock }] : []),
     { name: '系统设置', path: '/admin/settings', icon: Settings }
   ];
 
   const currentItem = navItems.find((item) => location.pathname.startsWith(item.path)) || navItems[0];
+
+  if (loading) {
+    return <div className="min-h-screen bg-gray-900 flex items-center justify-center">加载中...</div>;
+  }
+
+  if (!isAdmin && location.pathname.startsWith('/admin/users')) {
+    return <Navigate to="/admin" replace />;
+  }
 
   const handleLogout = async () => {
     try {
@@ -113,11 +149,49 @@ export default function AdminLayout({ children }) {
             <h1 className="text-lg font-semibold text-white">{currentItem.name}</h1>
           </div>
           <div className="flex items-center space-x-4">
+            {/* 返回主站按钮 */}
+            <div className="flex items-center space-x-2">
+              <Link
+                to="/"
+                target="_blank"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-primary-500 transition-all text-sm"
+                title="返回首页"
+              >
+                <Home size={16} />
+                <span className="hidden md:inline">首页</span>
+              </Link>
+              <Link
+                to="/showcase"
+                target="_blank"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-accent-500 transition-all text-sm"
+                title="大屏展示"
+              >
+                <DashboardIcon size={16} />
+                <span className="hidden md:inline">大屏展示</span>
+              </Link>
+              <Link
+                to="/gallery"
+                target="_blank"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-green-500 transition-all text-sm"
+                title="作品列表"
+              >
+                <ExternalLink size={16} />
+                <span className="hidden md:inline">作品列表</span>
+              </Link>
+            </div>
+
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-sm shadow-primary-500/20">
                 <Users size={16} className="text-white" />
               </div>
-              <span className="text-gray-400 text-sm hidden md:block">管理员</span>
+              <span className="text-gray-400 text-sm hidden md:block">
+                {currentUser?.name || currentUser?.username || '管理员'}
+              </span>
+              {isAdmin && (
+                <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">
+                  管理员
+                </span>
+              )}
             </div>
           </div>
         </header>
