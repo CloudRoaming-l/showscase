@@ -26,6 +26,7 @@ export default function PhotoForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [uploading, setUploading] = useState(false);
   const categories = CATEGORIES;
   const grades = ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级', '初一', '初二', '初三'];
 
@@ -122,6 +123,41 @@ export default function PhotoForm() {
       ...prev,
       imageUrl: `https://picsum.photos/seed/${randomSeed}/800/600`
     }));
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('请选择图片文件');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('图片大小不能超过10MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await photoAPI.uploadImage(file);
+      if (result.status === 'success' && result.data?.url) {
+        setFormData(prev => ({
+          ...prev,
+          imageUrl: result.data.url
+        }));
+        toast.success('上传成功');
+      } else {
+        toast.error(result.message || '上传失败');
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      toast.error(error.message || '上传失败，请重试');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   if (initLoading) {
@@ -239,16 +275,31 @@ export default function PhotoForm() {
             <label className="block text-sm font-medium text-gray-300 mb-2">
               作品图片 <span className="text-red-400">*</span>
             </label>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 flex-wrap gap-2">
               <input
                 type="text"
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="请输入图片URL或点击随机图片"
-                className={`flex-1 bg-gray-800/60 border rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none transition-colors ${
+                placeholder="请输入图片URL或点击上传"
+                className={`flex-1 min-w-[200px] bg-gray-800/60 border rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none transition-colors ${
                   errors.imageUrl ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
                 }`}
               />
+              <label
+                className={`flex items-center space-x-2 px-4 py-3 rounded-lg cursor-pointer transition-colors ${
+                  uploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-500'
+                } text-white`}
+              >
+                <ImageIcon size={18} />
+                <span>{uploading ? '上传中...' : '上传图片'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                  className="hidden"
+                />
+              </label>
               <button
                 type="button"
                 onClick={handleRandomImage}
@@ -259,6 +310,7 @@ export default function PhotoForm() {
               </button>
             </div>
             {errors.imageUrl && <p className="text-red-400 text-sm mt-1">{errors.imageUrl}</p>}
+            <p className="text-gray-500 text-xs mt-2">支持 JPG、PNG、GIF、WebP 格式，最大 10MB</p>
 
             {formData.imageUrl && (
               <div className="mt-4">

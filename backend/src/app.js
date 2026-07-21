@@ -2,12 +2,20 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import photoRoutes from './routes/photoRoutes.js';
+import scratchRoutes from './routes/scratchRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import authRoutes, { ensureDefaultAdmin } from './routes/authRoutes.js';
 import activityLogRoutes from './routes/activityLogRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import { paginationValidator, searchSanitizer } from './middleware/validate.js';
+import { turbowarpProxy } from './middleware/turbowarpProxy.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -60,6 +68,27 @@ app.use(express.urlencoded({ extended: true, limit: '256kb' }));
 app.use(paginationValidator);
 app.use(searchSanitizer);
 
+// —— 静态文件服务：上传的图片 ——
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  maxAge: '7d',
+  etag: true
+}));
+
+// —— 静态文件服务：Scratch 项目文件 ——
+app.use('/uploads/scratch', express.static(path.join(__dirname, '../uploads/scratch'), {
+  maxAge: '30d',
+  etag: true
+}));
+
+// —— 静态文件服务：Scratch 封面图 ——
+app.use('/uploads/scratch-covers', express.static(path.join(__dirname, '../uploads/scratch-covers'), {
+  maxAge: '7d',
+  etag: true
+}));
+
+// —— Turbowarp 反向代理（解决 iframe 跨域 + mixed content 加载本地项目文件失败）——
+app.use('/turbowarp', turbowarpProxy);
+
 // —— 健康检查（公开） ——
 app.get('/api/health', (req, res) => {
   res.json({
@@ -73,6 +102,7 @@ app.get('/api/health', (req, res) => {
 
 // —— 路由注册 ——
 app.use('/api/photos', photoRoutes);
+app.use('/api/scratch', scratchRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/activity-logs', activityLogRoutes);

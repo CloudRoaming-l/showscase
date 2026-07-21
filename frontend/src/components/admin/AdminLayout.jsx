@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Image,
+  Play,
   Users,
   Settings,
   LogOut,
@@ -50,6 +51,7 @@ export default function AdminLayout({ children }) {
   const navItems = [
     { name: '仪表盘', path: '/admin', icon: LayoutDashboard },
     { name: '作品管理', path: '/admin/photos', icon: Image },
+    { name: 'Scratch作品', path: '/admin/scratch', icon: Play },
     { name: '学生管理', path: '/admin/students', icon: Users },
     ...(isAdmin ? [{ name: '账号管理', path: '/admin/users', icon: UserCog }] : []),
     ...(isAdmin ? [{ name: '操作日志', path: '/admin/activity-logs', icon: Clock }] : []),

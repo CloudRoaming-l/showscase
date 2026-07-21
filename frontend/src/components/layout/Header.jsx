@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Image, Home, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Image, Home, LayoutDashboard, Play } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function Header() {
@@ -65,6 +65,7 @@ export default function Header() {
   const navItems = [
     { name: '首页', path: '/', icon: Home },
     { name: '作品展示', path: '/gallery', icon: Image },
+    { name: 'Scratch作品', path: '/scratch', icon: Play },
     { name: '大屏展示', path: '/showcase', icon: LayoutDashboard }
   ];
 

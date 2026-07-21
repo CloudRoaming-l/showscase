@@ -128,3 +128,13 @@ body {
   background-size: 200% auto;
   animation: gradient-shift 3s ease infinite;
 }
+
+/* 隐藏滚动条但保留滚动功能 */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

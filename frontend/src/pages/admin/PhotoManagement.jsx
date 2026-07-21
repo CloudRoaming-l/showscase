@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Eye, Plus, RefreshCw, X, Save, Upload, Star, StarOff, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertCircle, Download } from 'lucide-react';
+import { Search, Edit, Trash2, Eye, Plus, RefreshCw, X, Save, Upload, Star, StarOff, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertCircle, Download, Image as ImageIcon } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import PhotoLightbox from '../../components/gallery/PhotoLightbox.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
@@ -44,6 +44,7 @@ export default function PhotoManagement() {
     isFeatured: false
   });
   const [errors, setErrors] = useState({});
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => { loadData(); }, [statusFilter, activeFilter]);
 
@@ -227,6 +228,38 @@ export default function PhotoManagement() {
   const handleRandomImage = () => {
     const randomSeed = Math.floor(Math.random() * 1000);
     setFormData({ ...formData, imageUrl: `https://picsum.photos/seed/${randomSeed}/800/600` });
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('请选择图片文件');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('图片大小不能超过10MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await photoAPI.uploadImage(file);
+      if (result.status === 'success' && result.data?.url) {
+        setFormData(prev => ({ ...prev, imageUrl: result.data.url }));
+        toast.success('上传成功');
+      } else {
+        toast.error(result.message || '上传失败');
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      toast.error(error.message || '上传失败，请重试');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const handleSave = async () => {
@@ -664,11 +697,17 @@ export default function PhotoManagement() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">作品图片 <span className="text-red-400">*</span></label>
-                <div className="flex items-center space-x-2">
-                  <input type="text" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} className={`flex-1 bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.imageUrl ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'}`} placeholder="请输入图片URL" />
+                <div className="flex items-center space-x-2 flex-wrap gap-2">
+                  <input type="text" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} className={`flex-1 min-w-[200px] bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.imageUrl ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'}`} placeholder="请输入图片URL或点击上传" />
+                  <label className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg cursor-pointer transition-colors text-sm ${uploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-500'} text-white`}>
+                    <ImageIcon size={14} />
+                    <span>{uploading ? '上传中...' : '上传图片'}</span>
+                    <input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} className="hidden" />
+                  </label>
                   <button type="button" onClick={handleRandomImage} className="flex items-center space-x-1.5 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"><Upload size={14} /><span>随机</span></button>
                 </div>
                 {errors.imageUrl && <p className="text-red-400 text-xs mt-1">{errors.imageUrl}</p>}
+                <p className="text-gray-500 text-xs mt-1">支持 JPG、PNG、GIF、WebP 格式，最大 10MB</p>
                 {formData.imageUrl && <div className="mt-3"><img src={formData.imageUrl} alt="预览" className="max-w-sm max-h-40 rounded-lg border border-gray-700" /></div>}
               </div>
               <div>

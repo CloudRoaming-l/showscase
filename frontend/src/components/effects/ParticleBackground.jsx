@@ -33,58 +33,71 @@ export default function ParticleBackground() {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
 
-    const colors = ['#ff00ff', '#00ffff', '#ff0080', '#00ff80', '#ffff00', '#ff6600'];
-    const particleCount = 30;
+    const colors = ['#ff6b9d', '#c44dff', '#4d79ff', '#4de1ff', '#4dffb8', '#ffea4d'];
+    const particleCount = 80;
     
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        radius: Math.random() * 1.5 + 1,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 2 + 1,
         color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: Math.random() * 0.5 + 0.25
+        alpha: Math.random() * 0.5 + 0.2,
+        alphaChange: (Math.random() - 0.5) * 0.005,
+        wanderAngle: Math.random() * Math.PI * 2,
+        wanderSpeed: Math.random() * 0.02 + 0.01
       });
     }
 
-    const lineDistance = 100;
-    const mouseDistance = 120;
+    const lineDistance = 120;
+    const mouseRadius = 100;
+    const repulsionStrength = 50;
 
     const animate = () => {
-      ctx.fillStyle = 'rgba(10, 10, 15, 0.08)';
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.4)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const mouse = mouseRef.current;
 
       particles.forEach((p) => {
+        p.wanderAngle += p.wanderSpeed;
+        const wanderForce = 0.3;
+        p.vx += Math.cos(p.wanderAngle) * wanderForce * 0.05;
+        p.vy += Math.sin(p.wanderAngle) * wanderForce * 0.05;
+
         if (mouse.x !== null && mouse.y !== null) {
           const dx = mouse.x - p.x;
           const dy = mouse.y - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < mouseDistance) {
-            const force = (mouseDistance - dist) / mouseDistance;
-            p.vx += dx * force * 0.005;
-            p.vy += dy * force * 0.005;
+          if (dist < mouseRadius && dist > 0) {
+            const repulsion = (mouseRadius - dist) / mouseRadius;
+            const force = repulsion * repulsionStrength / dist;
+            p.vx -= dx * force * 0.02;
+            p.vy -= dy * force * 0.02;
           }
         }
 
-        const maxSpeed = 1.8;
-        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        if (speed > maxSpeed) {
-          p.vx = (p.vx / speed) * maxSpeed;
-          p.vy = (p.vy / speed) * maxSpeed;
-        }
+        p.vx *= 0.98;
+        p.vy *= 0.98;
 
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        if (p.x < -10) p.x = canvas.width + 10;
+        if (p.x > canvas.width + 10) p.x = -10;
+        if (p.y < -10) p.y = canvas.height + 10;
+        if (p.y > canvas.height + 10) p.y = -10;
+
+        p.alpha += p.alphaChange;
+        if (p.alpha < 0.2 || p.alpha > 0.7) {
+          p.alphaChange *= -1;
+        }
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.alpha;
         ctx.fill();
@@ -106,30 +119,11 @@ export default function ParticleBackground() {
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.strokeStyle = p1.color;
-            ctx.globalAlpha = (lineDistance - distSqrt) / lineDistance * 0.12;
+            ctx.globalAlpha = (lineDistance - distSqrt) / lineDistance * 0.08;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
-      }
-
-      if (mouse.x !== null && mouse.y !== null) {
-        particles.forEach((p) => {
-          const dx = mouse.x - p.x;
-          const dy = mouse.y - p.y;
-          const dist = dx * dx + dy * dy;
-
-          if (dist < mouseDistance * mouseDistance) {
-            const distSqrt = Math.sqrt(dist);
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = p.color;
-            ctx.globalAlpha = (mouseDistance - distSqrt) / mouseDistance * 0.25;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        });
       }
 
       ctx.globalAlpha = 1;

@@ -7,7 +7,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 温暖珊瑚红：艺术作品展示的"主色"（替代之前的纯血红）
         primary: {
           50: '#fff7f6',
           100: '#fdeae6',
@@ -20,7 +19,6 @@ export default {
           800: '#8f2816',
           900: '#772518',
         },
-        // 琥珀金：与珊瑚红搭配的强调色（替代之前清冷的蓝色）
         accent: {
           50: '#fefce8',
           100: '#fef9c3',
@@ -38,12 +36,22 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
       },
       animation: {
-        fadeIn: 'fadeIn 0.2s ease-out'
+        fadeIn: 'fadeIn 0.2s ease-out',
+        float: 'float 6s ease-in-out infinite',
+        pulseSlow: 'pulseSlow 4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0', transform: 'scale(0.98)' },
           '100%': { opacity: '1', transform: 'scale(1)' }
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' }
+        },
+        pulseSlow: {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '0.6' }
         }
       }
     },

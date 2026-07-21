@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Sparkles, Trophy, Users, Image as ImageIcon, ArrowRight, TrendingUp, Filter, ChevronDown, LayoutDashboard } from 'lucide-react';
+import { Sparkles, Trophy, Users, Image as ImageIcon, ArrowRight, TrendingUp, Filter, ChevronDown, LayoutDashboard, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PhotoCard from '../components/gallery/PhotoCard.jsx';
 import PhotoLightbox from '../components/gallery/PhotoLightbox.jsx';
@@ -179,6 +179,13 @@ export default function Home() {
             >
               <span>浏览全部作品</span>
               <ArrowRight size={20} />
+            </Link>
+            <Link
+              to="/scratch"
+              className="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium py-3 px-8 rounded-xl transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40"
+            >
+              <Play size={20} />
+              <span>Scratch 编程作品</span>
             </Link>
             <Link
               to="/showcase"

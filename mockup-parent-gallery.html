@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家长端作品展示 - UI设计稿</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  /* 手机外框 */
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    background: #fff;
+    border-radius: 44px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 0 0 12px #1a1a2e, 0 0 0 14px #2a2a4e;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 状态栏 */
+  .status-bar {
+    height: 44px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .status-bar .time { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+  .status-bar .icons { display: flex; align-items: center; gap: 5px; }
+  .status-bar .icons span { font-size: 12px; }
+
+  /* 顶部标题区 */
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 12px 20px 20px;
+    flex-shrink: 0;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .header-title {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .header-title small {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+  .header-badge {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* 搜索栏 */
+  .search-bar {
+    background: #fff;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .search-bar svg { width: 18px; height: 18px; color: #999; flex-shrink: 0; }
+  .search-bar input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    flex: 1;
+    color: #333;
+    background: transparent;
+  }
+  .search-bar input::placeholder { color: #aaa; }
+
+  /* 分类标签 */
+  .category-bar {
+    display: flex;
+    gap: 8px;
+    padding: 14px 20px 10px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .category-bar::-webkit-scrollbar { display: none; }
+  .cat-chip {
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .cat-chip.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+  }
+  .cat-chip:not(.active) {
+    background: #f5f5fa;
+    color: #666;
+  }
+
+  /* 作品列表区域 */
+  .gallery-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px 20px;
+    background: #fafafe;
+  }
+  .gallery-scroll::-webkit-scrollbar { width: 0; }
+
+  /* 瀑布流 */
+  .masonry {
+    columns: 2;
+    column-gap: 12px;
+  }
+  .work-card {
+    break-inside: avoid;
+    margin-bottom: 12px;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: transform 0.2s;
+  }
+  .work-card:active { transform: scale(0.98); }
+
+  .work-image {
+    width: 100%;
+    display: block;
+    border-radius: 14px 14px 0 0;
+  }
+  .work-image.tall { aspect-ratio: 3/4; }
+  .work-image.short { aspect-ratio: 1/1; }
+  .work-image.medium { aspect-ratio: 4/3; }
+
+  .work-image-placeholder {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .work-info {
+    padding: 10px 12px 12px;
+  }
+  .work-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .work-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #999;
+  }
+  .work-author {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .work-cat-tag {
+    background: #f0f0fa;
+    color: #667eea;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(255,165,0,0.3);
+  }
+
+  .work-card-wrapper { position: relative; }
+
+  /* 底部导航 */
+  .bottom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8px 0 24px;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: #999;
+  }
+  .nav-item.active { color: #667eea; }
+  .nav-item svg { width: 22px; height: 22px; }
+
+  /* 底部Home指示器 */
+  .home-indicator {
+    width: 134px;
+    height: 5px;
+    background: #1a1a2e;
+    border-radius: 3px;
+    margin: 0 auto 8px;
+    flex-shrink: 0;
+  }
+
+  /* 设计稿标注 */
+  .annotation {
+    position: absolute;
+    right: -280px;
+    width: 260px;
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+  }
+  .annotation::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 2px;
+    background: #667eea;
+  }
+  .annotation strong {
+    color: #667eea;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .annotation .pos-1 { top: 120px; }
+  .annotation .pos-2 { top: 280px; }
+  .annotation .pos-3 { top: 480px; }
+</style>
+</head>
+<body>
+
+<div style="position: relative;">
+  <!-- 手机模拟框 -->
+  <div class="phone-frame">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons">
+        <span>●●●●</span>
+        <span>📶</span>
+        <span>🔋</span>
+      </div>
+    </div>
+
+    <!-- 顶部渐变标题区 -->
+    <div class="header">
+      <div class="header-top">
+        <div class="header-title">
+          💻 CodeKids 作品展示
+          <small>看看孩子们的创意成果</small>
+        </div>
+        <div class="header-badge">43 件作品</div>
+      </div>
+      <!-- 搜索栏 -->
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="搜索孩子姓名或作品名..." readonly>
+      </div>
+    </div>
+
+    <!-- 分类标签 -->
+    <div class="category-bar">
+      <div class="cat-chip active">全部作品</div>
+      <div class="cat-chip">机器人编程</div>
+      <div class="cat-chip">动画制作</div>
+      <div class="cat-chip">游戏创作</div>
+      <div class="cat-chip">创意绘画</div>
+    </div>
+
+    <!-- 作品瀑布流 -->
+    <div class="gallery-scroll">
+      <div class="masonry">
+        <!-- 作品1 -->
+        <div class="work-card-wrapper">
+          <div class="featured-badge">⭐ 精选</div>
+          <div class="work-card">
+            <div class="work-image-placeholder tall" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+              <span>🤖</span>
+            </div>
+            <div class="work-info">
+              <div class="work-title">穿越丛林</div>
+              <div class="work-meta">
+                <div class="work-author">👤 耿相宜</div>
+                <span class="work-cat-tag">机器人编程</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 作品2 -->
+        <div class="work-card">
+          <div class="work-image-placeholder medium" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+            <span>🚗</span>
+          </div>
+          <div class="work-info">
+            <div class="work-title">智能小汽车</div>
+            <div class="work-meta">
+              <div class="work-author">👤 巧可智</div>
+              <span class="work-cat-tag">项目开发</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 作品3 -->
+        <div class="work-card">
+          <div class="work-image-placeholder short" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+            <span>🎨</span>
+          </div>
+          <div class="work-info">
+            <div class="work-title">我的动画梦</div>
+            <div class="work-meta">
+              <div class="work-author">👤 李小明</div>
+              <span class="work-cat-tag">动画制作</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 作品4 -->
+        <div class="work-card-wrapper">
+          <div class="featured-badge">⭐ 精选</div>
+          <div class="work-card">
+            <div class="work-image-placeholder tall" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+              <span>🎮</span>
+            </div>
+            <div class="work-info">
+              <div class="work-title">迷宫大冒险</div>
+              <div class="work-meta">
+                <div class="work-author">👤 王子涵</div>
+                <span class="work-cat-tag">游戏创作</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 作品5 -->
+        <div class="work-card">
+          <div class="work-image-placeholder medium" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+            <span>🤖</span>
+          </div>
+          <div class="work-info">
+            <div class="work-title">AI聊天机器人</div>
+            <div class="work-meta">
+              <div class="work-author">👤 张欣怡</div>
+              <span class="work-cat-tag">人工智能</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 作品6 -->
+        <div class="work-card">
+          <div class="work-image-placeholder short" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">
+            <span>🖼️</span>
+          </div>
+          <div class="work-info">
+            <div class="work-title">数字艺术画</div>
+            <div class="work-meta">
+              <div class="work-author">👤 陈雨萱</div>
+              <span class="work-cat-tag">创意绘画</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>作品</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>搜索</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+        <span>收藏</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>关于</span>
+      </div>
+    </div>
+
+    <!-- Home指示器 -->
+    <div class="home-indicator"></div>
+  </div>
+
+  <!-- 设计标注 -->
+  <div class="annotation" style="top: 100px;">
+    <strong>① 渐变标题 + 搜索</strong>
+    蓝紫渐变背景，搜索框置顶。家长打开即可搜索孩子姓名，一键找到作品。
+  </div>
+
+  <div class="annotation" style="top: 300px;">
+    <strong>② 分类标签</strong>
+    横向滑动的胶囊标签，点击即可按分类筛选。当前选中态有渐变色高亮。
+  </div>
+
+  <div class="annotation" style="top: 500px;">
+    <strong>③ 瀑布流作品墙</strong>
+    双列瀑布流布局，作品图片为主视觉。精选作品带金色徽章标识，卡片圆角柔和。
+  </div>
+
+  <div class="annotation" style="top: 700px;">
+    <strong>④ 底部Tab导航</strong>
+    极简的四标签导航：作品、搜索、收藏、关于。无需登录，即开即用。
+  </div>
+</div>
+
+</body>
+</html>

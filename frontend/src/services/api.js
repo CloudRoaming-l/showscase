@@ -126,7 +126,98 @@ export const photoAPI = {
 
   batchImport: async (photos) => api.post('/photos/batch', { photos }),
 
+  uploadImage: async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const result = await api.post('/photos/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return result;
+  },
+
   getStats: async () => api.get('/photos/stats/summary')
+};
+
+// Scratch 作品相关 API
+export const scratchAPI = {
+  getProjects: async (params = {}) => {
+    const result = await api.get('/scratch', { params });
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+
+  getProject: async (id) => {
+    const result = await api.get(`/scratch/${id}`);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+
+  getFeatured: async () => {
+    const result = await api.get('/scratch/featured');
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+
+  likeProject: async (id) => api.post(`/scratch/${id}/like`),
+
+  shareProject: async (id) => api.post(`/scratch/${id}/share`),
+
+  uploadProject: async (file) => {
+    const formData = new FormData();
+    formData.append('project', file);
+    const result = await api.post('/scratch/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return result;
+  },
+
+  uploadCover: async (file) => {
+    const formData = new FormData();
+    formData.append('cover', file);
+    const result = await api.post('/scratch/upload-cover', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return result;
+  },
+
+  getAdminProjects: async (params = {}) => {
+    const result = await api.get('/scratch/admin/all', { params });
+    return {
+      ...result,
+      data: normalizeList(result.data),
+      statusCounts: result.statusCounts
+    };
+  },
+
+  createProject: async (data) => {
+    const result = await api.post('/scratch', data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+
+  updateProject: async (id, data) => {
+    const result = await api.put(`/scratch/${id}`, data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+
+  deleteProject: async (id) => api.delete(`/scratch/${id}`)
 };
 
 // 学生相关 API

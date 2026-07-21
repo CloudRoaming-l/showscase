@@ -1,8 +1,48 @@
 import { Router } from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import sharp from 'sharp';
+import { fileURLToPath } from 'url';
 import Photo from '../models/Photo.js';
 import ActivityLog from '../models/ActivityLog.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { validatePhoto, VALID_CATEGORIES, STATUS_ENUM, PAGINATION, escapeRegExp, publicRateLimit, writeRateLimit, adminRateLimit } from '../middleware/validate.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const UPLOAD_DIR = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOAD_DIR);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`;
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp|bmp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('只允许上传图片文件'));
+  }
+});
 
 const router = Router();
 
@@ -177,6 +217,16 @@ router.get('/stats/summary', publicRateLimit, async (req, res) => {
       ]
     });
 
+    // 计算本月新增（基于 createdAt 字段）
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyNew = await Photo.countDocuments({
+      createdAt: { $gte: startOfMonth }
+    });
+
+    // 计算通过率
+    const approvalRate = totalPhotos > 0 ? Math.round((approvedCount / totalPhotos) * 100) : 100;
+
     res.json({
       status: 'success',
       data: {
@@ -187,6 +237,8 @@ router.get('/stats/summary', publicRateLimit, async (req, res) => {
         approved: approvedCount,
         rejected: rejectedCount,
         featured: featuredCount,
+        monthlyNew,
+        approvalRate,
         categories
       }
     });
@@ -194,6 +246,65 @@ router.get('/stats/summary', publicRateLimit, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: '获取统计数据失败'
+    });
+  }
+});
+
+// 图片上传接口（自动压缩）
+router.post('/upload', authMiddleware, writeRateLimit, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        status: 'error',
+        message: '请选择要上传的图片'
+      });
+    }
+
+    const filePath = req.file.path;
+    const originalSize = req.file.size;
+
+    // 自动压缩图片：最大宽度 1200px，转 JPEG 质量 80%
+    const compressedExt = '.jpg';
+    const compressedName = req.file.filename.replace(/\.[^.]+$/, compressedExt);
+    const compressedPath = path.join(UPLOAD_DIR, compressedName);
+
+    await sharp(filePath)
+      .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toFile(compressedPath);
+
+    // 删除原始文件，只保留压缩后的
+    if (filePath !== compressedPath) {
+      fs.unlinkSync(filePath);
+    }
+
+    const compressedSize = fs.statSync(compressedPath).size;
+    const imageUrl = `/uploads/${compressedName}`;
+
+    await logActivity({
+      action: 'upload_image',
+      targetType: 'photo',
+      targetId: compressedName,
+      targetName: req.file.originalname,
+      description: `上传图片: ${req.file.originalname} (原始 ${(originalSize / 1024).toFixed(1)} KB → 压缩后 ${(compressedSize / 1024).toFixed(1)} KB)`,
+      req
+    });
+
+    res.json({
+      status: 'success',
+      message: '上传成功',
+      data: {
+        url: imageUrl,
+        filename: compressedName,
+        originalName: req.file.originalname,
+        size: compressedSize,
+        originalSize
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 'error',
+      message: error.message || '上传失败'
     });
   }
 });
