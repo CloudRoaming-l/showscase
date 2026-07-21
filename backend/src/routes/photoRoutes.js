@@ -262,31 +262,41 @@ router.post('/upload', authMiddleware, writeRateLimit, upload.single('image'), a
 
     const filePath = req.file.path;
     const originalSize = req.file.size;
+    let finalName = req.file.filename;
+    let finalPath = filePath;
+    let compressedSize = originalSize;
 
-    // 自动压缩图片：最大宽度 1200px，转 JPEG 质量 80%
-    const compressedExt = '.jpg';
-    const compressedName = req.file.filename.replace(/\.[^.]+$/, compressedExt);
-    const compressedPath = path.join(UPLOAD_DIR, compressedName);
+    // 尝试压缩图片，失败则保留原图
+    try {
+      const compressedExt = '.jpg';
+      finalName = req.file.filename.replace(/\.[^.]+$/, compressedExt);
+      finalPath = path.join(UPLOAD_DIR, finalName);
 
-    await sharp(filePath)
-      .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 80 })
-      .toFile(compressedPath);
+      await sharp(filePath)
+        .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 80 })
+        .toFile(finalPath);
 
-    // 删除原始文件，只保留压缩后的
-    if (filePath !== compressedPath) {
-      fs.unlinkSync(filePath);
+      if (filePath !== finalPath) {
+        fs.unlinkSync(filePath);
+      }
+
+      compressedSize = fs.statSync(finalPath).size;
+    } catch (compressError) {
+      console.error('图片压缩失败，保留原图:', compressError.message);
+      finalName = req.file.filename;
+      finalPath = filePath;
+      compressedSize = originalSize;
     }
 
-    const compressedSize = fs.statSync(compressedPath).size;
-    const imageUrl = `/uploads/${compressedName}`;
+    const imageUrl = `/uploads/${finalName}`;
 
     await logActivity({
-      action: 'upload_image',
+      action: 'other',
       targetType: 'photo',
-      targetId: compressedName,
       targetName: req.file.originalname,
-      description: `上传图片: ${req.file.originalname} (原始 ${(originalSize / 1024).toFixed(1)} KB → 压缩后 ${(compressedSize / 1024).toFixed(1)} KB)`,
+      description: `上传图片: ${req.file.originalname} (原始 ${(originalSize / 1024).toFixed(1)} KB → 处理后 ${(compressedSize / 1024).toFixed(1)} KB)`,
+      details: { filename: finalName, url: imageUrl, compressed: compressedSize < originalSize },
       req
     });
 
@@ -295,13 +305,14 @@ router.post('/upload', authMiddleware, writeRateLimit, upload.single('image'), a
       message: '上传成功',
       data: {
         url: imageUrl,
-        filename: compressedName,
+        filename: finalName,
         originalName: req.file.originalname,
         size: compressedSize,
         originalSize
       }
     });
   } catch (error) {
+    console.error('上传接口错误:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || '上传失败'

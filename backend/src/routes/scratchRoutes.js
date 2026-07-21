@@ -339,11 +339,11 @@ router.post('/upload', authMiddleware, writeRateLimit, projectUpload.single('pro
     const fileUrl = `/uploads/scratch/${req.file.filename}`;
 
     await logActivity({
-      action: 'upload_scratch',
-      targetType: 'scratch_project',
-      targetId: req.file.filename,
+      action: 'other',
+      targetType: 'student',
       targetName: req.file.originalname,
       description: `上传 Scratch 项目: ${req.file.originalname} (${(req.file.size / 1024).toFixed(1)} KB)`,
+      details: { filename: req.file.filename, url: fileUrl },
       req
     });
 
