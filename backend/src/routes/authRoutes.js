@@ -12,30 +12,18 @@ const DEFAULT_EXPIRES_IN = '24h';
 
 // —— 默认管理员账号配置（用于：用户不存在时自动创建 + 标记是否需改密）——
 const DEFAULT_ADMIN = {
-  username: 'admin',
-  password: 'admin123',
-  name: '默认管理员',
+  username: process.env.ADMIN_USERNAME || 'admin',
+  password: process.env.ADMIN_PASSWORD || 'admin123',
+  name: process.env.ADMIN_NAME || '默认管理员',
   role: 'admin'
 };
 
 async function ensureDefaultAdmin() {
   try {
-    // 任何环境下：若管理员已存在，则不创建
     const existing = await User.findOne({ username: DEFAULT_ADMIN.username });
     if (existing) return;
 
-    // 运行时读取 NODE_ENV（避免模块加载早于 dotenv.config()）
     const nodeEnv = process.env.NODE_ENV || 'development';
-
-    // 生产环境：不自动创建默认账号（避免默认密码暴露风险）
-    if (nodeEnv === 'production') {
-      console.warn(
-        '[SAFETY] 生产环境未检测到管理员账号，请手动创建后再启动。'
-      );
-      return;
-    }
-
-    // 开发/测试环境：自动创建，但打印警告
     const hashedPassword = await bcrypt.hash(DEFAULT_ADMIN.password, 12);
     await User.create({
       username: DEFAULT_ADMIN.username,
@@ -44,9 +32,15 @@ async function ensureDefaultAdmin() {
       role: DEFAULT_ADMIN.role,
       status: 'active'
     });
-    console.log(
-      `✅ [DEV-ONLY] 已创建默认管理员：${DEFAULT_ADMIN.username} / ${DEFAULT_ADMIN.password}\n   ⚠  生产环境务必替换为强密码！`
-    );
+
+    if (nodeEnv === 'production') {
+      console.log(`✅ 生产环境已创建管理员账号：${DEFAULT_ADMIN.username}`);
+      console.warn('⚠️  请在首次登录后立即修改密码！');
+    } else {
+      console.log(
+        `✅ 已创建默认管理员：${DEFAULT_ADMIN.username} / ${DEFAULT_ADMIN.password}\n   ⚠  生产环境务必替换为强密码！`
+      );
+    }
   } catch (error) {
     console.error('创建默认管理员失败:', error.message);
   }

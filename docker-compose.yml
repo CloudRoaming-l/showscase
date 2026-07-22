@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:6.0
@@ -27,6 +25,9 @@ services:
       MONGODB_URI: mongodb://admin:${MONGO_PASSWORD:-showcase123}@mongodb:27017/student-showcase?authSource=admin
       JWT_SECRET: ${JWT_SECRET:-your-secret-key-here-must-be-at-least-32-characters}
       ALLOWED_ORIGIN: https://kidsshowcode.cn,https://www.kidsshowcode.cn,http://localhost:3000
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_NAME: ${ADMIN_NAME:-管理员}
     depends_on:
       - mongodb
     networks:
