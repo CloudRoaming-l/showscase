@@ -61,18 +61,26 @@ mongodump --db "$SOURCE_DB" --out "$DUMP_DIR"
 echo "  ✅ 导出完成"
 echo ""
 
-# —— Step 2: 导入到 Docker 容器 ——
-echo "[2/4] 导入数据到 Docker 容器..."
+# —— Step 2: 复制导出数据到容器并导入 ——
+echo "[2/4] 复制数据到容器并导入..."
 echo "  容器: $DOCKER_CONTAINER"
 echo "  用户: $MONGO_USER"
 
+# 先把宿主机导出的目录复制进容器
+CONTAINER_DUMP_DIR="/tmp/mongo-dump-internal"
+docker cp "$DUMP_DIR/$SOURCE_DB" "$DOCKER_CONTAINER:$CONTAINER_DUMP_DIR"
+
+# 再在容器内执行 mongorestore
 docker exec -i "$DOCKER_CONTAINER" mongorestore \
     --username "$MONGO_USER" \
     --password "$MONGO_PASSWORD" \
     --authenticationDatabase admin \
     --db "$SOURCE_DB" \
     --drop \
-    "$DUMP_DIR/$SOURCE_DB"
+    "$CONTAINER_DUMP_DIR"
+
+# 清理容器内临时文件
+docker exec "$DOCKER_CONTAINER" rm -rf "$CONTAINER_DUMP_DIR"
 
 echo "  ✅ 导入完成"
 echo ""
