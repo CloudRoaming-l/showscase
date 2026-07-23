@@ -23,6 +23,7 @@ verify-*.mjs
 test-login*.js
 test-login*.json
 backend/uploads/
+nginx/ssl/
 .trae/
 .workbuddy/
 frontend/vite.config.js.timestamp-*

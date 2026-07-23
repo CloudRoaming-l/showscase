@@ -1,4 +1,15 @@
+# ==========================================
+# kidsshowcode.cn Docker 部署配置
+# ==========================================
+# 使用方法：
+#   1. 修改同目录下 .env 文件中的密码和密钥
+#   2. 将 SSL 证书放到 nginx/ssl/cert.pem 和 nginx/ssl/key.pem
+#   3. docker compose up -d --build
+#
+# 变量从同目录 .env 文件读取
+
 services:
+  # —— MongoDB 数据库 ——
   mongodb:
     image: mongo:6.0
     container_name: showcase-mongodb
@@ -8,9 +19,16 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-showcase123}
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - showcase-network
 
+  # —— 后端 Node.js API ——
   backend:
     build:
       context: ./backend
@@ -23,27 +41,35 @@ services:
       NODE_ENV: production
       PORT: 5001
       MONGODB_URI: mongodb://admin:${MONGO_PASSWORD:-showcase123}@mongodb:27017/student-showcase?authSource=admin
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key-here-must-be-at-least-32-characters}
-      ALLOWED_ORIGIN: https://kidsshowcode.cn,https://www.kidsshowcode.cn,http://localhost:3000
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-to-a-long-random-string-of-at-least-64-characters-xx}
+      JWT_EXPIRES_IN: 24h
+      ALLOWED_ORIGIN: https://kidsshowcode.cn,https://www.kidsshowcode.cn,http://111.231.145.221
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       ADMIN_NAME: ${ADMIN_NAME:-管理员}
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5001:5001"
     networks:
       - showcase-network
 
+  # —— 前端 React SPA（Nginx 提供静态文件）——
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_ORIGIN: ${VITE_API_ORIGIN:-https://kidsshowcode.cn}
     container_name: showcase-frontend
     restart: always
-    networks:
-      - showcase-network
     depends_on:
       - backend
+    networks:
+      - showcase-network
 
+  # —— 外层 Nginx 反向代理（SSL + 路由分发）——
   nginx:
     image: nginx:alpine
     container_name: showcase-nginx
@@ -52,8 +78,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - frontend
       - backend
