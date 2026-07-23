@@ -20,7 +20,9 @@ echo ""
 MODE="${1:-deploy}"
 
 if [ "$MODE" = "update" ]; then
-    echo "[1/4] 拉取最新代码..."
+    echo "[1/4] 同步最新代码（自动丢弃本地修改）..."
+    git checkout -- .
+    git clean -fd
     git pull github main
     echo ""
     echo "[2/4] 清理缓存并重新构建（避免 Vite index.html 不刷新）..."
