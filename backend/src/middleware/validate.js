@@ -1,18 +1,10 @@
 // 字段校验 + XSS 过滤 + 分页校验 + 搜索清洗 + 基础限流中间件
 
 import ActivityLog from '../models/ActivityLog.js';
+import Category from '../models/Category.js';
 
 // ——— 全局共享常量 ———
-export const VALID_CATEGORIES = [
-  '机器人编程',
-  '动画制作',
-  '项目开发',
-  '游戏创作',
-  '人工智能',
-  '网页设计',
-  '创意绘画'
-];
-
+// VALID_CATEGORIES 已移除，分类改为从数据库动态获取（见 /api/categories）
 export const STATUS_ENUM = ['pending', 'approved', 'rejected'];
 export const USER_ROLE_ENUM = ['admin', 'teacher'];
 export const USER_STATUS_ENUM = ['active', 'inactive'];
@@ -157,14 +149,14 @@ export const writeRateLimit = rateLimit({ windowMs: 60 * 1000, max: 30 });
 export const adminRateLimit = rateLimit({ windowMs: 60 * 1000, max: 60 });
 
 // ———————— 作品校验 ————————
-export function validatePhoto(req, res, next) {
-  const { title, description, category, author, authorId, grade, imageUrl, isFeatured } = req.body;
+export async function validatePhoto(req, res, next) {
+  const { title, description, category, author, authorId, grade, groupId, imageUrl, isFeatured } = req.body;
 
   if (!title || typeof title !== 'string' || title.trim() === '') {
     return res.status(400).json({ status: 'error', message: '作品名称不能为空' });
   }
   if (!category || typeof category !== 'string') {
-    return res.status(400).json({ status: 'error', message: '请选择分类' });
+    return res.status(400).json({ status: 'error', message: '请选择作品类型' });
   }
   if (!author || typeof author !== 'string' || author.trim() === '') {
     return res.status(400).json({ status: 'error', message: '作者名称不能为空' });
@@ -181,9 +173,13 @@ export function validatePhoto(req, res, next) {
   if (description && (typeof description !== 'string' || description.length > 500)) {
     return res.status(400).json({ status: 'error', message: '作品描述不能超过500个字符' });
   }
-  if (!VALID_CATEGORIES.includes(category.trim())) {
-    return res.status(400).json({ status: 'error', message: '无效的分类' });
+
+  // 动态校验分类是否存在于数据库（photo 类型）
+  const cat = await Category.findOne({ name: category.trim(), type: 'photo' });
+  if (!cat) {
+    return res.status(400).json({ status: 'error', message: '无效的分类，请从分类列表中选择' });
   }
+
   if (!/^(https?:\/\/|data:|\/)/.test(imageUrl)) {
     return res.status(400).json({ status: 'error', message: '图片URL格式无效' });
   }
@@ -203,6 +199,11 @@ export function validatePhoto(req, res, next) {
     body.authorId = authorId;
   }
 
+  // 有提供 groupId 时，校验为合法 ObjectId 后保存
+  if (groupId && typeof groupId === 'string' && /^[0-9a-fA-F]{24}$/.test(groupId)) {
+    body.groupId = groupId;
+  }
+
   req.body = body;
 
   next();
@@ -210,7 +211,7 @@ export function validatePhoto(req, res, next) {
 
 // ———————— 学生校验 ————————
 export function validateStudent(req, res, next) {
-  const { name, grade, className, phone, avatar } = req.body;
+  const { name, grade, className, groupId, phone, avatar } = req.body;
 
   if (!name || typeof name !== 'string' || name.trim() === '') {
     return res.status(400).json({ status: 'error', message: '学生姓名不能为空' });
@@ -229,6 +230,11 @@ export function validateStudent(req, res, next) {
     phone: phone ? phone.replace(/[^\d]/g, '').slice(0, 11) : '',
     avatar: avatar ? avatar.trim() : ''
   };
+
+  // 有提供 groupId 时，校验为合法 ObjectId 后保存
+  if (groupId && typeof groupId === 'string' && /^[0-9a-fA-F]{24}$/.test(groupId)) {
+    req.body.groupId = groupId;
+  }
 
   next();
 }

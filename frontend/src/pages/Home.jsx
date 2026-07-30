@@ -47,7 +47,7 @@ export default function Home() {
         setPhotos(displayPhotos);
         setStudents(studentsResult.data || []);
 
-        // 计算所有作品的分类数量
+        // 计算所有作品的作品类型数量
         const allPhotos = photosResult.data || [];
         const counts = {};
         allPhotos.forEach((p) => {
@@ -127,7 +127,7 @@ export default function Home() {
     { label: '学生人数', value: animatedStats.students, suffix: '+', icon: Users, color: 'from-blue-500 to-cyan-500' },
     { label: '作品数量', value: animatedStats.works, suffix: '', icon: ImageIcon, color: 'from-purple-500 to-pink-500' },
     { label: '精选作品', value: animatedStats.awards, suffix: '', icon: Trophy, color: 'from-yellow-500 to-orange-500' },
-    { label: '作品分类', value: animatedStats.categories, suffix: '', icon: Sparkles, color: 'from-green-500 to-emerald-500' }
+    { label: '作品类型', value: animatedStats.categories, suffix: '', icon: Sparkles, color: 'from-green-500 to-emerald-500' }
   ];
 
   const categoryColors = [
@@ -222,7 +222,7 @@ export default function Home() {
       <section className="py-16 bg-gray-900/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">作品分类</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">作品类型</h2>
             <p className="text-gray-400">探索不同领域的学生创意</p>
           </div>
 

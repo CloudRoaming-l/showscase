@@ -7,7 +7,8 @@ import { fileURLToPath } from 'url';
 import Photo from '../models/Photo.js';
 import ActivityLog from '../models/ActivityLog.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { validatePhoto, VALID_CATEGORIES, STATUS_ENUM, PAGINATION, escapeRegExp, publicRateLimit, writeRateLimit, adminRateLimit } from '../middleware/validate.js';
+import { validatePhoto, STATUS_ENUM, PAGINATION, escapeRegExp, publicRateLimit, writeRateLimit, adminRateLimit } from '../middleware/validate.js';
+import Category from '../models/Category.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,15 +47,20 @@ const upload = multer({
 
 const router = Router();
 
-// 公开接口：返回共享常量（分类列表、状态枚举）
-router.get('/config', publicRateLimit, (req, res) => {
-  res.json({
-    status: 'success',
-    data: {
-      categories: VALID_CATEGORIES,
-      statuses: STATUS_ENUM
-    }
-  });
+// 公开接口：返回分类列表（从数据库查询）、状态枚举
+router.get('/config', publicRateLimit, async (req, res) => {
+  try {
+    const categories = await Category.find({ type: 'photo', status: 'active' }).sort({ sort: 1, createdAt: 1 });
+    res.json({
+      status: 'success',
+      data: {
+        categories: categories.map(c => c.name),
+        statuses: STATUS_ENUM
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: '获取配置失败' });
+  }
 });
 
 // 操作日志辅助函数
@@ -82,6 +88,7 @@ router.get('/', publicRateLimit, async (req, res) => {
   try {
     // 从全局 paginationValidator / searchSanitizer 取清洗后的值
     const category = req.query.category;
+    const groupId = req.query.groupId;
     const page = parseInt(req.query.page, 10) || PAGINATION.DEFAULT_PAGE;
     const limit = parseInt(req.query.limit, 10) || PAGINATION.DEFAULT_LIMIT;
     const search = req.query.search;
@@ -94,8 +101,11 @@ router.get('/', publicRateLimit, async (req, res) => {
         { status: '' }
       ]
     };
-    if (category && category !== 'all' && VALID_CATEGORIES.includes(category)) {
+    if (category && category !== 'all') {
       query.category = category;
+    }
+    if (groupId && /^[0-9a-fA-F]{24}$/.test(groupId)) {
+      query.groupId = groupId;
     }
 
     if (search) {
@@ -352,6 +362,7 @@ router.get('/admin/all', authMiddleware, adminRateLimit, async (req, res) => {
   try {
     const status = req.query.status;
     const category = req.query.category;
+    const groupId = req.query.groupId;
     const search = req.query.search;
     const page = parseInt(req.query.page, 10) || PAGINATION.DEFAULT_PAGE;
     const limit = parseInt(req.query.limit, 10) || PAGINATION.DEFAULT_LIMIT;
@@ -360,8 +371,11 @@ router.get('/admin/all', authMiddleware, adminRateLimit, async (req, res) => {
     if (status && status !== 'all' && STATUS_ENUM.includes(status)) {
       query.status = status;
     }
-    if (category && category !== 'all' && VALID_CATEGORIES.includes(category)) {
+    if (category && category !== 'all') {
       query.category = category;
+    }
+    if (groupId && /^[0-9a-fA-F]{24}$/.test(groupId)) {
+      query.groupId = groupId;
     }
     if (search) {
       const safeSearch = escapeRegExp(String(search).slice(0, PAGINATION.SEARCH_MAX_LEN));
@@ -671,7 +685,10 @@ router.post('/batch', authMiddleware, writeRateLimit, async (req, res) => {
     }
 
     const { sanitizeString } = await import('../middleware/validate.js');
-    const VALID_CATEGORIES = ['机器人编程', '动画制作', '项目开发', '游戏创作', '人工智能', '网页设计', '创意绘画'];
+
+    // 从数据库获取有效分类列表
+    const validCategories = await Category.find({ type: 'photo', status: 'active' }).select('name');
+    const validCategoryNames = validCategories.map(c => c.name);
 
     // 逐条校验和清理数据
     const sanitizedPhotos = [];
@@ -685,7 +702,7 @@ router.post('/batch', authMiddleware, writeRateLimit, async (req, res) => {
         errors.push(`第 ${i + 1} 行：作品名称不能为空`);
         continue;
       }
-      if (!photo.category || !VALID_CATEGORIES.includes(photo.category)) {
+      if (!photo.category || !validCategoryNames.includes(photo.category)) {
         errors.push(`第 ${i + 1} 行：无效的分类`);
         continue;
       }

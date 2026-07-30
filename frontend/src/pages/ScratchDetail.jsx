@@ -3,6 +3,7 @@ import { ArrowLeft, Eye, Heart, Play, Share2, Maximize2, Info, Gamepad2, Chevron
 import { useParams, useNavigate } from 'react-router-dom';
 import { scratchAPI } from '../services/api.js';
 import { useToast } from '../components/common/Toast.jsx';
+import CommentSection from '../components/comments/CommentSection.jsx';
 
 export default function ScratchDetail() {
   const { id } = useParams();
@@ -310,6 +311,11 @@ export default function ScratchDetail() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* 评论区 */}
+            <div className="card p-6">
+              <CommentSection targetType="scratch" targetId={id} />
             </div>
           </div>
 

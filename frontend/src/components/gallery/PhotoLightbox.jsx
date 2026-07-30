@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { X, User, Calendar, Tag, ArrowLeft, ArrowRight, Heart, Share2, Copy, Check } from 'lucide-react';
 import { isFavorite, addFavorite, removeFavorite, toggleLike, getLikeCount } from '../../utils/interaction';
 import { CATEGORIES } from '../../utils/sharedData.js';
+import CommentSection from '../comments/CommentSection.jsx';
 
 export default function PhotoLightbox({ photo, photos, currentIndex, onClose, onPrev, onNext }) {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -113,38 +114,39 @@ export default function PhotoLightbox({ photo, photos, currentIndex, onClose, on
     >
       <button
         onClick={(e) => {
-          stopPropagation(e);
+          e.stopPropagation();
           onClose();
         }}
-        className="absolute top-6 right-6 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition-colors"
+        className="absolute right-6 z-[200] w-14 h-14 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center text-white transition-colors cursor-pointer"
+        style={{ top: '80px' }}
         title="关闭 (Esc)"
       >
-        <X size={24} />
+        <X size={28} />
       </button>
 
       {onPrev && (
         <button
           onClick={(e) => {
-            stopPropagation(e);
+            e.stopPropagation();
             onPrev();
           }}
-          className="absolute left-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-[200] w-14 h-14 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center text-white transition-colors hidden md:flex cursor-pointer"
           title="上一张 (←)"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={28} />
         </button>
       )}
 
       {onNext && (
         <button
           onClick={(e) => {
-            stopPropagation(e);
+            e.stopPropagation();
             onNext();
           }}
-          className="absolute right-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-[200] w-14 h-14 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center text-white transition-colors hidden md:flex cursor-pointer"
           title="下一张 (→)"
         >
-          <ArrowRight size={24} />
+          <ArrowRight size={28} />
         </button>
       )}
 
@@ -288,6 +290,11 @@ export default function PhotoLightbox({ photo, photos, currentIndex, onClose, on
               </div>
             </div>
           )}
+
+          {/* 评论区 */}
+          <div className="border-t border-gray-700 pt-4 mb-6">
+            <CommentSection targetType="photo" targetId={photoId} />
+          </div>
 
           <div className="mt-auto pt-4 border-t border-gray-700">
             <p className="text-xs text-gray-500 text-center">

@@ -7,6 +7,7 @@ import ScratchProject from '../models/ScratchProject.js';
 import ActivityLog from '../models/ActivityLog.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { PAGINATION, escapeRegExp, publicRateLimit, writeRateLimit, adminRateLimit } from '../middleware/validate.js';
+import Category from '../models/Category.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -95,10 +96,26 @@ const logActivity = async ({ action, targetType, targetId, targetName, descripti
   }
 };
 
+// 公开接口：返回 Scratch 分类列表
+router.get('/config', publicRateLimit, async (req, res) => {
+  try {
+    const categories = await Category.find({ type: 'scratch', status: 'active' }).sort({ sort: 1, createdAt: 1 });
+    res.json({
+      status: 'success',
+      data: {
+        categories: categories.map(c => c.name)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: '获取配置失败' });
+  }
+});
+
 // 公开接口：Scratch 作品列表
 router.get('/', publicRateLimit, async (req, res) => {
   try {
     const category = req.query.category;
+    const groupId = req.query.groupId;
     const page = parseInt(req.query.page, 10) || PAGINATION.DEFAULT_PAGE;
     const limit = parseInt(req.query.limit, 10) || PAGINATION.DEFAULT_LIMIT;
     const search = req.query.search;
@@ -108,6 +125,9 @@ router.get('/', publicRateLimit, async (req, res) => {
 
     if (category && category !== 'all') {
       query.category = category;
+    }
+    if (groupId && /^[0-9a-fA-F]{24}$/.test(groupId)) {
+      query.groupId = groupId;
     }
 
     if (search) {
@@ -400,6 +420,7 @@ router.get('/admin/all', authMiddleware, adminRateLimit, async (req, res) => {
   try {
     const status = req.query.status;
     const category = req.query.category;
+    const groupId = req.query.groupId;
     const search = req.query.search;
     const page = parseInt(req.query.page, 10) || PAGINATION.DEFAULT_PAGE;
     const limit = parseInt(req.query.limit, 10) || PAGINATION.DEFAULT_LIMIT;
@@ -410,6 +431,9 @@ router.get('/admin/all', authMiddleware, adminRateLimit, async (req, res) => {
     }
     if (category && category !== 'all') {
       query.category = category;
+    }
+    if (groupId && /^[0-9a-fA-F]{24}$/.test(groupId)) {
+      query.groupId = groupId;
     }
     if (search) {
       const safeSearch = escapeRegExp(String(search).slice(0, PAGINATION.SEARCH_MAX_LEN));

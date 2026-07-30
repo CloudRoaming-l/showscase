@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { VALID_CATEGORIES, STATUS_ENUM } from '../middleware/validate.js';
+import { STATUS_ENUM } from '../middleware/validate.js';
 
 const photoSchema = new mongoose.Schema(
   {
@@ -16,8 +16,7 @@ const photoSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      required: [true, '请选择分类'],
-      enum: VALID_CATEGORIES
+      required: [true, '请选择作品类型']
     },
     author: {
       type: String,
@@ -28,6 +27,11 @@ const photoSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Student',
       description: '关联学生ID（可选，若提供则可用于查询和详情和展示关联数据）'
+    },
+    groupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group',
+      default: null
     },
     grade: {
       type: String,

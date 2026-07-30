@@ -1,18 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Eye, Heart, Share2, Play, Sparkles, Clock, Filter, ChevronDown } from 'lucide-react';
+import { Search, Eye, Heart, Share2, Play, Sparkles, Clock, Filter, ChevronDown, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { scratchAPI } from '../services/api.js';
+import { scratchAPI, categoryAPI, groupAPI } from '../services/api.js';
 import { useToast } from '../components/common/Toast.jsx';
 import Pagination from '../components/common/Pagination.jsx';
-
-const CATEGORIES = [
-  { value: 'all', label: '全部' },
-  { value: 'Scratch编程', label: 'Scratch编程' },
-  { value: '游戏创作', label: '游戏创作' },
-  { value: '动画制作', label: '动画制作' },
-  { value: '互动故事', label: '互动故事' },
-  { value: '数学科学', label: '数学科学' }
-];
 
 export default function ScratchGallery() {
   const navigate = useNavigate();
@@ -26,10 +17,31 @@ export default function ScratchGallery() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [categories, setCategories] = useState([{ value: 'all', label: '全部' }]);
+  const [groups, setGroups] = useState([{ value: 'all', label: '全部教学小组' }]);
+  const [selectedGroupId, setSelectedGroupId] = useState('all');
+  const [showGroupDropdown, setShowGroupDropdown] = useState(false);
 
   useEffect(() => {
     fetchProjects();
-  }, [page, selectedCategory, sortBy]);
+  }, [page, selectedCategory, sortBy, selectedGroupId]);
+
+  // 从后端拉取作品类型与教学小组列表
+  useEffect(() => {
+    categoryAPI.getList('scratch').then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        const list = [{ value: 'all', label: '全部' }, ...res.data.map((c) => ({ value: c.name, label: c.name }))];
+        setCategories(list);
+      }
+    }).catch(() => {});
+
+    groupAPI.getList().then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        const list = [{ value: 'all', label: '全部教学小组' }, ...res.data.map((g) => ({ value: g.id, label: g.name }))];
+        setGroups(list);
+      }
+    }).catch(() => {});
+  }, []);
 
   // 搜索防抖：输入停止 500ms 后自动搜索
   useEffect(() => {
@@ -53,6 +65,9 @@ export default function ScratchGallery() {
         search: searchQuery,
         sortBy
       };
+      if (selectedGroupId !== 'all') {
+        params.groupId = selectedGroupId;
+      }
       const result = await scratchAPI.getProjects(params);
       setProjects(result.data || []);
       setTotalPages(result.pagination?.pages || 1);
@@ -77,10 +92,21 @@ export default function ScratchGallery() {
     setPage(1);
   };
 
+  const handleGroupChange = (gid) => {
+    setSelectedGroupId(gid);
+    setShowGroupDropdown(false);
+    setPage(1);
+  };
+
   const currentCategoryLabel = useMemo(() => {
-    const cat = CATEGORIES.find(c => c.value === selectedCategory);
+    const cat = categories.find(c => c.value === selectedCategory);
     return cat ? cat.label : '全部';
-  }, [selectedCategory]);
+  }, [selectedCategory, categories]);
+
+  const currentGroupLabel = useMemo(() => {
+    const g = groups.find(g => g.value === selectedGroupId);
+    return g ? g.label : '全部教学小组';
+  }, [selectedGroupId, groups]);
 
   const formatCount = (count) => {
     if (count >= 10000) return (count / 10000).toFixed(1) + 'w';
@@ -109,7 +135,7 @@ export default function ScratchGallery() {
         </div>
 
         {/* 搜索和筛选栏 */}
-        <div className="card p-4 mb-6">
+        <div className="card p-4 mb-6 relative z-30">
           <div className="flex flex-col md:flex-row gap-4">
             {/* 搜索框 */}
             <form onSubmit={handleSearch} className="flex-1">
@@ -128,7 +154,7 @@ export default function ScratchGallery() {
               </div>
             </form>
 
-            {/* 分类筛选 */}
+            {/* 作品类型筛选 */}
             <div className="relative">
               <button
                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
@@ -140,8 +166,8 @@ export default function ScratchGallery() {
               </button>
 
               {showCategoryDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-xl shadow-xl border border-gray-700 z-20 overflow-hidden">
-                  {CATEGORIES.map((cat) => (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-xl shadow-xl border border-gray-700 z-50 overflow-hidden">
+                  {categories.map((cat) => (
                     <button
                       key={cat.value}
                       onClick={() => handleCategoryChange(cat.value)}
@@ -152,6 +178,36 @@ export default function ScratchGallery() {
                       }`}
                     >
                       {cat.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 教学小组筛选 */}
+            <div className="relative">
+              <button
+                onClick={() => setShowGroupDropdown(!showGroupDropdown)}
+                className="flex items-center gap-2 px-5 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white hover:bg-gray-700/50 transition-colors min-w-[140px]"
+              >
+                <Users size={18} />
+                <span className="flex-1 text-left">{currentGroupLabel}</span>
+                <ChevronDown size={16} className={showGroupDropdown ? 'rotate-180' : ''} />
+              </button>
+
+              {showGroupDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-xl shadow-xl border border-gray-700 z-50 overflow-hidden">
+                  {groups.map((g) => (
+                    <button
+                      key={g.value}
+                      onClick={() => handleGroupChange(g.value)}
+                      className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors ${
+                        selectedGroupId === g.value
+                          ? 'text-primary-400 bg-gray-700/50'
+                          : 'text-gray-300'
+                      }`}
+                    >
+                      {g.label}
                     </button>
                   ))}
                 </div>
@@ -241,7 +297,7 @@ export default function ScratchGallery() {
                       </div>
                     )}
 
-                    {/* 分类标签 */}
+                    {/* 作品类型标签 */}
                     <div className="absolute top-3 right-3 px-2.5 py-1 bg-black/60 backdrop-blur-sm text-white text-xs rounded-full">
                       {project.category}
                     </div>
@@ -291,7 +347,7 @@ export default function ScratchGallery() {
               <Play size={40} className="text-gray-600" />
             </div>
             <p className="text-gray-400 text-lg mb-2">暂无作品</p>
-            <p className="text-gray-500 text-sm">搜索其他关键词或换个分类试试吧</p>
+            <p className="text-gray-500 text-sm">搜索其他关键词或换个作品类型试试吧</p>
           </div>
         )}
       </div>

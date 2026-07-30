@@ -5,7 +5,7 @@ import PhotoLightbox from '../../components/gallery/PhotoLightbox.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import Pagination from '../../components/common/Pagination.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
-import { photoAPI, studentAPI, isAuthError } from '../../services/api.js';
+import { photoAPI, studentAPI, groupAPI, isAuthError } from '../../services/api.js';
 import { exportPhotos } from '../../utils/exportData.js';
 import { CATEGORIES } from '../../utils/sharedData.js';
 
@@ -33,12 +33,15 @@ export default function PhotoManagement() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const toast = useToast();
+  const [groups, setGroups] = useState([]);
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState('all');
   const [formData, setFormData] = useState({
     _id: null,
     title: '',
     category: CATEGORIES[0],
     author: '',
     grade: '',
+    groupId: '',
     description: '',
     imageUrl: '',
     isFeatured: false
@@ -46,7 +49,16 @@ export default function PhotoManagement() {
   const [errors, setErrors] = useState({});
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => { loadData(); }, [statusFilter, activeFilter]);
+  useEffect(() => { loadData(); }, [statusFilter, activeFilter, selectedGroupFilter]);
+
+  // 加载教学小组列表
+  useEffect(() => {
+    groupAPI.getList?.().then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        setGroups(res.data);
+      }
+    }).catch(() => {});
+  }, []);
 
   // 批量导入处理
   const handleImport = async () => {
@@ -123,6 +135,7 @@ export default function PhotoManagement() {
       const params = { limit: 200 };
       if (activeFilter !== 'all') params.category = activeFilter;
       if (statusFilter !== 'all') params.status = statusFilter;
+      if (selectedGroupFilter !== 'all') params.groupId = selectedGroupFilter;
       if (searchTerm) params.search = searchTerm;
 
       const [photosResult, adminPhotosResult, studentsResult] = await Promise.all([
@@ -192,6 +205,7 @@ export default function PhotoManagement() {
       category: CATEGORIES[0],
       author: students.length > 0 ? students[0].name : '',
       grade: students.length > 0 ? (students[0].grade || '') : '',
+      groupId: '',
       description: '',
       imageUrl: '',
       isFeatured: false
@@ -208,6 +222,7 @@ export default function PhotoManagement() {
       category: photo.category,
       author: photo.author,
       grade: photo.grade || '',
+      groupId: photo.groupId || '',
       description: photo.description || '',
       imageUrl: photo.imageUrl,
       isFeatured: photo.isFeatured || false
@@ -272,6 +287,7 @@ export default function PhotoManagement() {
           category: formData.category,
           author: formData.author,
           grade: formData.grade,
+          groupId: formData.groupId,
           description: formData.description,
           imageUrl: formData.imageUrl,
           isFeatured: formData.isFeatured
@@ -283,6 +299,7 @@ export default function PhotoManagement() {
           category: formData.category,
           author: formData.author,
           grade: formData.grade,
+          groupId: formData.groupId,
           description: formData.description,
           imageUrl: formData.imageUrl,
           isFeatured: formData.isFeatured
@@ -488,9 +505,19 @@ export default function PhotoManagement() {
               onChange={(e) => setActiveFilter(e.target.value)}
               className="bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary-500"
             >
-              <option value="all">全部分类</option>
+              <option value="all">全部作品类型</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <select
+              value={selectedGroupFilter}
+              onChange={(e) => setSelectedGroupFilter(e.target.value)}
+              className="bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary-500"
+            >
+              <option value="all">全部教学小组</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </select>
             <button onClick={handleAdd} className="flex items-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20">
@@ -554,7 +581,8 @@ export default function PhotoManagement() {
                     </button>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作品</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">分类</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作品类型</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">教学小组</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作者</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">状态</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">更新日期</th>
@@ -612,6 +640,16 @@ export default function PhotoManagement() {
                         <span className="inline-flex px-2 py-1 bg-gray-700/50 rounded text-xs text-gray-300">
                           {photo.category}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const g = groups.find(g => g.id === photo.groupId);
+                          return g ? (
+                            <span className="inline-flex px-2 py-1 bg-primary-500/10 text-primary-400 rounded text-xs">
+                              {g.name}
+                            </span>
+                          ) : <span className="text-gray-600 text-xs">-</span>;
+                        })()}
                       </td>
                       <td className="px-4 py-3 text-gray-400 text-sm">{photo.author || '-'}</td>
                       <td className="px-4 py-3">{getStatusBadge(photo.status)}</td>
@@ -675,7 +713,7 @@ export default function PhotoManagement() {
                   {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">作品分类</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">作品类型</label>
                   <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500">
                     {categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
                   </select>
@@ -693,6 +731,15 @@ export default function PhotoManagement() {
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">年级</label>
                   <input type="text" value={formData.grade} readOnly className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 opacity-60" placeholder="自动从学生信息获取" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">教学小组</label>
+                  <select value={formData.groupId} onChange={(e) => setFormData({ ...formData, groupId: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500">
+                    <option value="">请选择小组</option>
+                    {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                  </select>
                 </div>
               </div>
               <div>
@@ -795,7 +842,7 @@ export default function PhotoManagement() {
               <div className="bg-gray-800/40 rounded-lg p-3">
                 <p className="text-xs text-gray-400 mb-2">必填字段：title, category, author, imageUrl</p>
                 <p className="text-xs text-gray-400">可选字段：description, grade, isFeatured</p>
-                <p className="text-xs text-gray-400">分类可选：{categories.join('、')}</p>
+                <p className="text-xs text-gray-400">可选类型：{categories.join('、')}</p>
               </div>
             </div>
             <div className="flex space-x-2 p-5 border-t border-gray-700/50">

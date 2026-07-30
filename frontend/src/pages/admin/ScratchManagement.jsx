@@ -4,9 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import Pagination from '../../components/common/Pagination.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
-import { scratchAPI, isAuthError } from '../../services/api.js';
-
-const CATEGORIES = ['Scratch编程', '游戏创作', '动画制作', '互动故事', '数学科学'];
+import { scratchAPI, categoryAPI, groupAPI, isAuthError } from '../../services/api.js';
 
 export default function ScratchManagement() {
   const [projects, setProjects] = useState([]);
@@ -21,17 +19,20 @@ export default function ScratchManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const toast = useToast();
+  const [categories, setCategories] = useState([]);
+  const [groups, setGroups] = useState([]);
 
   const [formData, setFormData] = useState({
     _id: null,
     title: '',
     description: '',
     instructions: '',
-    category: CATEGORIES[0],
+    category: '',
     author: '',
     coverUrl: '',
     projectFile: '',
     projectFileSize: 0,
+    groupId: '',
     isFeatured: false
   });
   const [uploading, setUploading] = useState(false);
@@ -40,6 +41,20 @@ export default function ScratchManagement() {
   useEffect(() => {
     loadData();
   }, [statusFilter, categoryFilter, page]);
+
+  // 加载作品类型与教学小组列表
+  useEffect(() => {
+    categoryAPI.getList('scratch').then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        setCategories(res.data.map((c) => c.name));
+      }
+    }).catch(() => {});
+    groupAPI.getList().then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        setGroups(res.data);
+      }
+    }).catch(() => {});
+  }, []);
 
   const loadData = async () => {
     try {
@@ -76,11 +91,12 @@ export default function ScratchManagement() {
       title: '',
       description: '',
       instructions: '',
-      category: CATEGORIES[0],
+      category: categories[0] || '',
       author: '',
       coverUrl: '',
       projectFile: '',
       projectFileSize: 0,
+      groupId: '',
       isFeatured: false
     });
     setShowModal(true);
@@ -93,11 +109,12 @@ export default function ScratchManagement() {
       title: project.title,
       description: project.description || '',
       instructions: project.instructions || '',
-      category: project.category || CATEGORIES[0],
+      category: project.category || categories[0] || '',
       author: project.author,
       coverUrl: project.coverUrl || '',
       projectFile: project.projectFile,
       projectFileSize: project.projectFileSize || 0,
+      groupId: project.groupId || '',
       isFeatured: !!project.isFeatured
     });
     setShowModal(true);
@@ -256,8 +273,8 @@ export default function ScratchManagement() {
                 onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
                 className="px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500/50"
               >
-                <option value="all">全部分类</option>
-                {CATEGORIES.map((c) => (
+                <option value="all">全部作品类型</option>
+                {categories.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -290,7 +307,8 @@ export default function ScratchManagement() {
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作品</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作者</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">分类</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作品类型</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">教学小组</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">状态</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">浏览/点赞/分享</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">操作</th>
@@ -328,6 +346,16 @@ export default function ScratchManagement() {
                           <span className="px-2 py-0.5 bg-primary-500/10 text-primary-400 text-xs rounded-full">
                             {project.category}
                           </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {(() => {
+                            const g = groups.find(g => g.id === project.groupId);
+                            return g ? (
+                              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs rounded-full">
+                                {g.name}
+                              </span>
+                            ) : <span className="text-gray-600 text-xs">-</span>;
+                          })()}
                         </td>
                         <td className="px-4 py-3">{statusBadge(project.status)}</td>
                         <td className="px-4 py-3 text-gray-400 text-sm">
@@ -429,7 +457,7 @@ export default function ScratchManagement() {
                 />
               </div>
 
-              {/* 作者 + 分类 */}
+              {/* 作者 + 作品类型 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">作者 *</label>
@@ -442,17 +470,34 @@ export default function ScratchManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">分类</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">作品类型</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:border-primary-500/50"
                   >
-                    {CATEGORIES.map((c) => (
+                    {categories.map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* 教学小组 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  教学小组 <span className="text-gray-500 text-xs">(可选)</span>
+                </label>
+                <select
+                  value={formData.groupId}
+                  onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:border-primary-500/50"
+                >
+                  <option value="">请选择教学小组</option>
+                  {groups.map((group) => (
+                    <option key={group.id} value={group.id}>{group.name}</option>
+                  ))}
+                </select>
               </div>
 
               {/* 项目文件上传 */}

@@ -20,13 +20,17 @@ const scratchProjectSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      required: [true, '请选择分类'],
-      default: 'Scratch编程'
+      required: [true, '请选择作品类型']
     },
     author: {
       type: String,
       required: [true, '作者名称不能为空'],
       trim: true
+    },
+    groupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group',
+      default: null
     },
     coverUrl: {
       type: String,

@@ -9,6 +9,7 @@ const router = Router();
 router.get('/', publicRateLimit, async (req, res) => {
   try {
     const grade = req.query.grade;
+    const groupId = req.query.groupId;
     const search = req.query.search;
     const page = parseInt(req.query.page, 10) || PAGINATION.DEFAULT_PAGE;
     const limit = parseInt(req.query.limit, 10) || PAGINATION.DEFAULT_LIMIT;
@@ -16,6 +17,9 @@ router.get('/', publicRateLimit, async (req, res) => {
 
     if (grade && grade !== 'all') {
       query.grade = grade;
+    }
+    if (groupId && /^[0-9a-fA-F]{24}$/.test(groupId)) {
+      query.groupId = groupId;
     }
 
     if (search) {

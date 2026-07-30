@@ -366,4 +366,89 @@ export const authAPI = {
   getCurrentUser: async () => api.get('/auth/me')
 };
 
+// 作品类型管理 API
+export const categoryAPI = {
+  getList: async (type) => {
+    const result = await api.get('/categories', { params: { type } });
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+  getAdminList: async (type) => {
+    const result = await api.get('/categories/admin/all', { params: { type } });
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+  create: async (data) => {
+    const result = await api.post('/categories', data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+  update: async (id, data) => {
+    const result = await api.put(`/categories/${id}`, data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+  delete: async (id) => api.delete(`/categories/${id}`)
+};
+
+// 教学小组管理 API
+export const groupAPI = {
+  getList: async () => {
+    const result = await api.get('/groups');
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+  getAdminList: async () => {
+    const result = await api.get('/groups/admin/all');
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+  create: async (data) => {
+    const result = await api.post('/groups', data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+  update: async (id, data) => {
+    const result = await api.put(`/groups/${id}`, data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+  delete: async (id) => api.delete(`/groups/${id}`)
+};
+
+// 评论 API
+export const commentAPI = {
+  getList: async (params) => {
+    const result = await api.get('/comments', { params });
+    return {
+      ...result,
+      data: normalizeList(result.data)
+    };
+  },
+  create: async (data) => {
+    const result = await api.post('/comments', data);
+    return {
+      ...result,
+      data: normalizeItem(result.data)
+    };
+  },
+  delete: async (id) => api.delete(`/comments/${id}`)
+};
+
 export default api;

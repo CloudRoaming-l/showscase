@@ -394,7 +394,7 @@ export default function DashboardShowcase() {
             <div className="text-center">
               <div className="text-8xl mb-6 opacity-60">🌌</div>
               <p className="text-xl text-cyan-200 mb-2">未检测到符合条件的数据</p>
-              <p className="text-sm text-cyan-300/50" style={{ fontFamily: 'JetBrains Mono, monospace' }}>请调整搜索参数或分类筛选</p>
+              <p className="text-sm text-cyan-300/50" style={{ fontFamily: 'JetBrains Mono, monospace' }}>请调整搜索参数或作品类型筛选</p>
             </div>
           </div>
         ) : (

@@ -136,7 +136,7 @@ export default function Author() {
               </div>
             </div>
 
-            {/* 作品分类概览 */}
+            {/* 作品类型概览 */}
             {!isLoading && categoriesUsed.length > 1 && (
               <div className="w-full md:w-auto md:ml-auto flex flex-wrap gap-2 justify-center">
                 {categoriesUsed
@@ -214,7 +214,7 @@ export default function Author() {
           </div>
         ) : filteredPhotos.length === 0 ? (
           <div className="text-center py-12">
-          <p className="text-gray-400 text-sm">该分类下暂无作品</p>
+          <p className="text-gray-400 text-sm">该作品类型下暂无作品</p>
         </div>
       ) : (
           photoCards

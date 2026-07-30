@@ -37,7 +37,7 @@ export default function Dashboard() {
       const students = studentsResult.data || [];
       const serverStats = statsResult?.data || statsResult || {};
 
-      // 本地分类统计作为补充，覆盖可能缺失的后端数据
+      // 本地作品类型统计作为补充，覆盖可能缺失的后端数据
       const localCategoryCount = {};
       photos.forEach((p) => {
         if (p.category) localCategoryCount[p.category] = (localCategoryCount[p.category] || 0) + 1;
@@ -297,12 +297,12 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 分类统计 */}
+          {/* 作品类型统计 */}
           <div className="card p-5">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-base font-semibold text-white">分类统计</h2>
-                <p className="text-gray-500 text-xs mt-0.5">各分类作品分布</p>
+                <h2 className="text-base font-semibold text-white">作品类型统计</h2>
+                <p className="text-gray-500 text-xs mt-0.5">各作品类型分布</p>
               </div>
             </div>
             <div className="space-y-4">

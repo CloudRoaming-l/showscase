@@ -3,7 +3,7 @@ import { Grid, Filter, Search, X, Heart, Star } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import PhotoCard from '../components/gallery/PhotoCard.jsx';
 import PhotoLightbox from '../components/gallery/PhotoLightbox.jsx';
-import { photoAPI } from '../services/api.js';
+import { photoAPI, groupAPI } from '../services/api.js';
 import { getFavorites } from '../utils/interaction';
 import { CATEGORIES } from '../utils/sharedData.js';
 
@@ -22,6 +22,8 @@ export default function Gallery() {
     { id: 'all', name: '全部作品' },
     ...CATEGORIES.map((cat) => ({ id: cat, name: cat }))
   ]);
+  const [groups, setGroups] = useState([{ id: 'all', name: '全部教学小组' }]);
+  const [selectedGroupId, setSelectedGroupId] = useState('all');
 
   const PAGE_SIZE = 20;
 
@@ -54,7 +56,7 @@ export default function Gallery() {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFilter, showFavorites, page, debouncedTerm]);
+  }, [activeFilter, showFavorites, page, debouncedTerm, selectedGroupId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -63,12 +65,23 @@ export default function Gallery() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // 从后端拉取共享常量（分类列表）
+  // 从后端拉取作品类型列表
   useEffect(() => {
     photoAPI.getConfig?.().then((res) => {
       if (res?.data?.categories && Array.isArray(res.data.categories)) {
         const list = [{ id: 'all', name: '全部作品' }, ...res.data.categories.map((c) => ({ id: c, name: c }))];
         setCategories(list);
+      }
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 从后端拉取教学小组列表
+  useEffect(() => {
+    groupAPI.getList?.().then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        const list = [{ id: 'all', name: '全部教学小组' }, ...res.data.map((g) => ({ id: g.id, name: g.name }))];
+        setGroups(list);
       }
     }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,11 +97,16 @@ export default function Gallery() {
       if (activeFilter !== 'all' && !showFavorites) {
         params.category = activeFilter;
       }
+      if (selectedGroupId !== 'all') {
+        params.groupId = selectedGroupId;
+      }
 
       let data = [];
       if (showFavorites) {
         // 收藏模式：先拉全部再过滤
-        const result = await photoAPI.getPhotos({ limit: 500 });
+        const favParams = { limit: 500 };
+        if (selectedGroupId !== 'all') favParams.groupId = selectedGroupId;
+        const result = await photoAPI.getPhotos(favParams);
         const allPhotos = result.data || [];
         const favorites = getFavorites();
         data = allPhotos.filter(p =>
@@ -176,6 +194,23 @@ export default function Gallery() {
             <X size={18} />
           </button>
         )}
+      </div>
+
+      <div className="flex items-center space-x-2 mb-4">
+        <Filter size={20} className="text-gray-400 mr-2 flex-shrink-0" />
+        <label className="text-sm text-gray-400 whitespace-nowrap">教学小组</label>
+        <select
+          value={selectedGroupId}
+          onChange={(e) => {
+            setSelectedGroupId(e.target.value);
+            setPage(1);
+          }}
+          className="bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500 transition-all duration-200 cursor-pointer"
+        >
+          {groups.map((g) => (
+            <option key={g.id} value={g.id}>{g.name}</option>
+          ))}
+        </select>
       </div>
 
       <div className="flex items-center space-x-2 mb-8 overflow-x-auto pb-2">
@@ -282,7 +317,7 @@ export default function Gallery() {
           subtitle = '尝试更换关键词或取消搜索';
         } else if (activeFilter !== 'all') {
           icon = '🖼️';
-          title = `"${activeFilter}" 分类下还没有作品`;
+          title = `"${activeFilter}" 作品类型下还没有作品`;
           subtitle = '快来成为第一个分享者吧';
         }
 
@@ -292,12 +327,13 @@ export default function Gallery() {
             <p className="text-gray-300 text-xl mb-2">{title}</p>
             <p className="text-gray-500 text-sm">{subtitle}</p>
             <div className="flex items-center justify-center gap-3 mt-6">
-              {(debouncedTerm || activeFilter !== 'all' || showFavorites) && (
+              {(debouncedTerm || activeFilter !== 'all' || showFavorites || selectedGroupId !== 'all') && (
                 <button
                   onClick={() => {
                     handleClearSearch();
                     handleClearFilter();
                     setShowFavorites(false);
+                    setSelectedGroupId('all');
                   }}
                   className="px-5 py-2 bg-primary-500/20 border border-primary-500/30 text-primary-300 hover:bg-primary-500/30 rounded-lg transition-colors text-sm"
                 >

@@ -11,6 +11,9 @@ import studentRoutes from './routes/studentRoutes.js';
 import authRoutes, { ensureDefaultAdmin } from './routes/authRoutes.js';
 import activityLogRoutes from './routes/activityLogRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import groupRoutes from './routes/groupRoutes.js';
+import commentRoutes from './routes/commentRoutes.js';
 import { paginationValidator, searchSanitizer } from './middleware/validate.js';
 import { turbowarpProxy } from './middleware/turbowarpProxy.js';
 
@@ -107,6 +110,9 @@ app.use('/api/students', studentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api/comments', commentRoutes);
 
 // —— 404 兜底 ——
 app.use('/api', (req, res) => {

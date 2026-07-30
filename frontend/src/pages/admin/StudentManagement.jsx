@@ -4,11 +4,12 @@ import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import Pagination from '../../components/common/Pagination.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
-import { photoAPI, studentAPI, isAuthError } from '../../services/api.js';
+import { photoAPI, studentAPI, groupAPI, isAuthError } from '../../services/api.js';
 
 export default function StudentManagement() {
   const [students, setStudents] = useState([]);
   const [photos, setPhotos] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -22,6 +23,7 @@ export default function StudentManagement() {
     name: '',
     grade: '',
     className: '',
+    groupId: '',
     phone: '',
     joinDate: ''
   });
@@ -29,6 +31,15 @@ export default function StudentManagement() {
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  // 加载教学小组列表
+  useEffect(() => {
+    groupAPI.getList().then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        setGroups(res.data);
+      }
+    }).catch(() => {});
   }, []);
 
   const loadData = async () => {
@@ -92,6 +103,7 @@ export default function StudentManagement() {
       name: '',
       grade: '',
       className: '',
+      groupId: '',
       phone: '',
       joinDate: new Date().toISOString().split('T')[0]
     });
@@ -106,6 +118,7 @@ export default function StudentManagement() {
       name: student.name,
       grade: student.grade || '',
       className: student.className || '',
+      groupId: student.groupId || '',
       phone: student.phone || '',
       joinDate: student.joinDate || ''
     });
@@ -339,6 +352,22 @@ export default function StudentManagement() {
                   />
                   {errors.className && <p className="text-red-400 text-xs mt-1">{errors.className}</p>}
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  教学小组 <span className="text-gray-500 text-xs">(可选)</span>
+                </label>
+                <select
+                  value={formData.groupId}
+                  onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                >
+                  <option value="">请选择教学小组</option>
+                  {groups.map((group) => (
+                    <option key={group.id} value={group.id}>{group.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>

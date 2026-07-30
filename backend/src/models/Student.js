@@ -16,6 +16,11 @@ const studentSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    groupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group',
+      default: null
+    },
     phone: {
       type: String,
       trim: true

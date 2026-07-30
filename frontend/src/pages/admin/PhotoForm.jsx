@@ -3,7 +3,7 @@ import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
-import { photoAPI, studentAPI } from '../../services/api.js';
+import { photoAPI, studentAPI, groupAPI } from '../../services/api.js';
 import { CATEGORIES } from '../../utils/sharedData.js';
 
 export default function PhotoForm() {
@@ -18,11 +18,13 @@ export default function PhotoForm() {
     author: '',
     authorId: '',
     grade: '',
+    groupId: '',
     description: '',
     imageUrl: '',
     isFeatured: false
   });
   const [students, setStudents] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -43,6 +45,19 @@ export default function PhotoForm() {
     loadStudents();
   }, []);
 
+  // 加载教学小组列表
+  useEffect(() => {
+    const loadGroups = async () => {
+      try {
+        const result = await groupAPI.getList();
+        setGroups(result.data || []);
+      } catch (error) {
+        console.error('加载教学小组列表失败:', error);
+      }
+    };
+    loadGroups();
+  }, []);
+
   // 编辑模式：加载现有作品数据
   useEffect(() => {
     if (isEdit && id) {
@@ -58,6 +73,7 @@ export default function PhotoForm() {
               author: photo.author || '',
               authorId: photo.authorId ? (photo.authorId.id || photo.authorId._id || photo.authorId) : '',
               grade: photo.grade || '',
+              groupId: photo.groupId || '',
               description: photo.description || '',
               imageUrl: photo.imageUrl || '',
               isFeatured: photo.isFeatured || false
@@ -88,7 +104,7 @@ export default function PhotoForm() {
   const validate = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = '请输入作品名称';
-    if (!formData.category) newErrors.category = '请选择分类';
+    if (!formData.category) newErrors.category = '请选择作品类型';
     if (!formData.author.trim()) newErrors.author = '请选择作者';
     if (!formData.imageUrl.trim()) newErrors.imageUrl = '请输入图片地址';
     setErrors(newErrors);
@@ -220,7 +236,7 @@ export default function PhotoForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                作品分类 <span className="text-red-400">*</span>
+                作品类型 <span className="text-red-400">*</span>
               </label>
               <select
                 value={formData.category}
@@ -234,6 +250,22 @@ export default function PhotoForm() {
                 ))}
               </select>
               {errors.category && <p className="text-red-400 text-sm mt-1">{errors.category}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                教学小组 <span className="text-gray-500 text-xs">(可选)</span>
+              </label>
+              <select
+                value={formData.groupId}
+                onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
+                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-primary-500 transition-colors"
+              >
+                <option value="">请选择教学小组</option>
+                {groups.map((group) => (
+                  <option key={group.id} value={group.id}>{group.name}</option>
+                ))}
+              </select>
             </div>
 
             <div>
