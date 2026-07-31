@@ -3,7 +3,7 @@ import { Image, Users, Award, BarChart3, AlertCircle, CheckCircle2, XCircle, Tre
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { photoAPI, studentAPI, isAuthError } from '../../services/api.js';
-import { CATEGORIES } from '../../utils/sharedData.js';
+import { getCategoryColor } from '../../utils/sharedData.js';
 
 export default function Dashboard() {
   const toast = useToast();
@@ -56,7 +56,7 @@ export default function Dashboard() {
         rejected: serverStats.rejected ?? localRejected,
         featured: serverStats.featured ?? photos.filter((p) => p.isFeatured).length,
         totalAuthors: serverStats.totalAuthors ?? new Set(photos.map((p) => p.author).filter(Boolean)).size,
-        categories: CATEGORIES.length
+        categories: Object.keys(localCategoryCount).length
       });
 
       const recent = [...photos]
@@ -72,21 +72,14 @@ export default function Dashboard() {
         }));
       setRecentPhotos(recent);
 
-      const colors = [
-        'from-purple-500 to-blue-500',
-        'from-pink-500 to-red-500',
-        'from-yellow-500 to-orange-500',
-        'from-cyan-500 to-blue-500',
-        'from-violet-500 to-purple-500',
-        'from-emerald-500 to-teal-500',
-        'from-amber-500 to-yellow-500'
-      ];
-      const maxCount = Math.max(...CATEGORIES.map((cat) => localCategoryCount[cat] || 0), 1);
+      // 基于实际作品的分类计数动态生成分类统计（不再依赖硬编码 CATEGORIES）
+      const categoryNames = Object.keys(localCategoryCount);
+      const maxCount = Math.max(...categoryNames.map((cat) => localCategoryCount[cat] || 0), 1);
       setCategoryData(
-        CATEGORIES.map((cat, i) => ({
+        categoryNames.map((cat) => ({
           name: cat,
           count: localCategoryCount[cat] || 0,
-          color: colors[i] || colors[0],
+          color: getCategoryColor(cat),
           percentage: Math.round(((localCategoryCount[cat] || 0) / maxCount) * 100)
         }))
       );

@@ -1,6 +1,5 @@
 // 数据导入导出工具 - 使用后端 API
 import { photoAPI, studentAPI } from '../services/api.js';
-import { CATEGORIES } from './sharedData.js';
 
 // 导出作品数据
 export async function exportPhotosData() {
@@ -172,14 +171,14 @@ export async function importData(type, file) {
 
 // 导入作品
 async function importPhotos(data) {
-  const categories = CATEGORIES;
   const photosToImport = [];
 
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
     photosToImport.push({
       title: row['作品名称'] || `作品 ${Date.now() + i}`,
-      category: categories.includes(row['分类']) ? row['分类'] : '创意绘画',
+      // 分类不再用硬编码列表校验，直接透传导入值（后端会校验合法性）
+      category: row['分类'] || '',
       author: row['作者'] || '未知作者',
       grade: row['年级'] || '',
       description: row['描述'] || '',

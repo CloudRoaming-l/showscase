@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Eye, User, Calendar, Heart, Share2, Copy, Check } from 'lucide-react';
 import { isFavorite, addFavorite, removeFavorite, toggleLike, getLikeCount, getShareUrl } from '../../utils/interaction';
-import { CATEGORIES } from '../../utils/sharedData.js';
+import { getCategoryColor } from '../../utils/sharedData.js';
 
 export default function PhotoCard({ photo, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -33,20 +33,6 @@ export default function PhotoCard({ photo, onClick }) {
     setIsFavorited(isFavorite(photo.id || photo._id));
     setLikeCount(getLikeCount(photo.id || photo._id));
   }, [photo.id, photo._id]);
-
-  const categoryColorList = [
-    'from-purple-500 to-blue-500',
-    'from-pink-500 to-red-500',
-    'from-yellow-500 to-orange-500',
-    'from-cyan-500 to-blue-500',
-    'from-violet-500 to-purple-500',
-    'from-emerald-500 to-teal-500',
-    'from-amber-500 to-yellow-500'
-  ];
-  const categoryColors = CATEGORIES.reduce((acc, cat, i) => {
-    acc[cat] = categoryColorList[i] || categoryColorList[0];
-    return acc;
-  }, {});
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -103,7 +89,7 @@ export default function PhotoCard({ photo, onClick }) {
           </div>
         )}
         {imageFailed ? (
-          <div className={`absolute inset-0 bg-gradient-to-br ${categoryColors[photo.category] || 'from-purple-600 to-blue-600'} opacity-90 flex flex-col items-center justify-center text-white p-4 text-center`}>
+          <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(photo.category)} opacity-90 flex flex-col items-center justify-center text-white p-4 text-center`}>
             <div className="w-14 h-14 rounded-full bg-white/15 border border-white/30 flex items-center justify-center mb-2 backdrop-blur-sm">
               <Eye size={24} />
             </div>
@@ -127,7 +113,7 @@ export default function PhotoCard({ photo, onClick }) {
           )
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${categoryColors[photo.category] || 'from-gray-500 to-gray-600'}`}>
+        <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${getCategoryColor(photo.category)}`}>
           {photo.category}
         </div>
 

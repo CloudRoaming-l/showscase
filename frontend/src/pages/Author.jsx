@@ -5,7 +5,6 @@ import PhotoCard from '../components/gallery/PhotoCard.jsx';
 import PhotoLightbox from '../components/gallery/PhotoLightbox.jsx';
 import { photoAPI, studentAPI } from '../services/api.js';
 import { useToast } from '../components/common/Toast.jsx';
-import { CATEGORIES } from '../utils/sharedData.js';
 
 export default function Author() {
   const [authorName, setAuthorName] = useState('');

@@ -3,8 +3,7 @@ import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
-import { photoAPI, studentAPI, groupAPI } from '../../services/api.js';
-import { CATEGORIES } from '../../utils/sharedData.js';
+import { photoAPI, studentAPI, groupAPI, categoryAPI } from '../../services/api.js';
 
 export default function PhotoForm() {
   const toast = useToast();
@@ -14,7 +13,7 @@ export default function PhotoForm() {
 
   const [formData, setFormData] = useState({
     title: '',
-    category: CATEGORIES[0],
+    category: '',
     author: '',
     authorId: '',
     grade: '',
@@ -25,11 +24,11 @@ export default function PhotoForm() {
   });
   const [students, setStudents] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [uploading, setUploading] = useState(false);
-  const categories = CATEGORIES;
   const grades = ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级', '初一', '初二', '初三'];
 
   // 加载学生列表用于选择作者
@@ -58,6 +57,22 @@ export default function PhotoForm() {
     loadGroups();
   }, []);
 
+  // 动态加载作品类型列表（photo 类型）
+  useEffect(() => {
+    categoryAPI.getList('photo').then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        const names = res.data.map((c) => c.name);
+        setCategories(names);
+        // 非编辑模式且当前未选分类时，默认选第一个
+        if (!isEdit && names.length > 0) {
+          setFormData((prev) => (!prev.category ? { ...prev, category: names[0] } : prev));
+        }
+      }
+    }).catch((error) => {
+      console.error('加载作品类型列表失败:', error);
+    });
+  }, []);
+
   // 编辑模式：加载现有作品数据
   useEffect(() => {
     if (isEdit && id) {
@@ -69,7 +84,7 @@ export default function PhotoForm() {
           if (photo) {
             setFormData({
               title: photo.title || '',
-              category: photo.category || CATEGORIES[0],
+              category: photo.category || '',
               author: photo.author || '',
               authorId: photo.authorId ? (photo.authorId.id || photo.authorId._id || photo.authorId) : '',
               grade: photo.grade || '',

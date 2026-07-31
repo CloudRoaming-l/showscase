@@ -113,15 +113,33 @@ router.put('/:id', authMiddleware, writeRateLimit, async (req, res) => {
       update.status = status;
     }
 
+    // 先查出原分类，用于判断 name 是否变化及同步关联作品
+    const oldCategory = await Category.findById(req.params.id);
+    if (!oldCategory) {
+      return res.status(404).json({ status: 'error', message: '未找到该分类' });
+    }
+
+    // 如果 name 发生变化，同步更新所有关联作品的 category 字段
+    // （Photo/ScratchProject 用名称字符串存储 category，见 Photo.js 第17行、ScratchProject.js 第21行）
+    if (update.name && oldCategory.name !== update.name) {
+      if (oldCategory.type === 'photo') {
+        await Photo.updateMany(
+          { category: oldCategory.name },
+          { $set: { category: update.name } }
+        );
+      } else if (oldCategory.type === 'scratch') {
+        await ScratchProject.updateMany(
+          { category: oldCategory.name },
+          { $set: { category: update.name } }
+        );
+      }
+    }
+
     const category = await Category.findByIdAndUpdate(
       req.params.id,
       update,
       { new: true, runValidators: true }
     );
-
-    if (!category) {
-      return res.status(404).json({ status: 'error', message: '未找到该分类' });
-    }
 
     res.json({
       status: 'success',

@@ -494,11 +494,20 @@ router.post('/', authMiddleware, writeRateLimit, async (req, res) => {
       return res.status(400).json({ status: 'error', message: '请上传 Scratch 项目文件' });
     }
 
+    // 校验分类必须存在且属于 scratch 类型（与 validate.js 中 validatePhoto 逻辑一致）
+    if (!category || !category.trim()) {
+      return res.status(400).json({ status: 'error', message: '请选择分类' });
+    }
+    const cat = await Category.findOne({ name: category.trim(), type: 'scratch' });
+    if (!cat) {
+      return res.status(400).json({ status: 'error', message: '无效的分类，请从分类列表中选择' });
+    }
+
     const project = await ScratchProject.create({
       title: title.trim(),
       description: description || '',
       instructions: instructions || '',
-      category: category || 'Scratch编程',
+      category: category.trim(),
       author: author.trim(),
       coverUrl: coverUrl || '',
       projectFile: projectFile.trim(),
@@ -533,6 +542,19 @@ router.post('/', authMiddleware, writeRateLimit, async (req, res) => {
 // 管理员接口：更新 Scratch 作品
 router.put('/:id', authMiddleware, writeRateLimit, async (req, res) => {
   try {
+    // 若传了 category，校验其合法性（与 POST 逻辑一致）
+    if (req.body.category !== undefined) {
+      const category = req.body.category;
+      if (!category || !category.trim()) {
+        return res.status(400).json({ status: 'error', message: '请选择分类' });
+      }
+      const cat = await Category.findOne({ name: category.trim(), type: 'scratch' });
+      if (!cat) {
+        return res.status(400).json({ status: 'error', message: '无效的分类，请从分类列表中选择' });
+      }
+      req.body.category = category.trim();
+    }
+
     const project = await ScratchProject.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -612,6 +634,100 @@ router.delete('/:id', authMiddleware, writeRateLimit, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: '删除作品失败'
+    });
+  }
+});
+
+// 管理员接口：批量审核通过
+router.post('/batch/approve', authMiddleware, writeRateLimit, async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: '请提供有效的作品ID列表'
+      });
+    }
+
+    const result = await ScratchProject.updateMany(
+      { _id: { $in: ids } },
+      { status: 'approved', rejectedReason: '' }
+    );
+
+    await logActivity({
+      action: 'batch_approve',
+      targetType: 'scratch_project',
+      targetId: ids,
+      targetName: `${ids.length} 个 Scratch 作品`,
+      description: `批量审核通过 ${result.modifiedCount} 个 Scratch 作品`,
+      req
+    });
+
+    res.json({
+      status: 'success',
+      message: `已通过 ${result.modifiedCount} 个作品`,
+      data: { modifiedCount: result.modifiedCount }
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 'error',
+      message: '批量审核失败'
+    });
+  }
+});
+
+// 管理员接口：批量删除
+router.post('/batch/delete', authMiddleware, writeRateLimit, async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: '请提供有效的作品ID列表'
+      });
+    }
+
+    // 先查询要删除的作品，获取文件路径用于清理
+    const projects = await ScratchProject.find({ _id: { $in: ids } });
+
+    // 删除关联文件
+    for (const project of projects) {
+      if (project.projectFile) {
+        const filePath = path.join(UPLOAD_DIR, project.projectFile.replace('/uploads/scratch/', ''));
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+      if (project.coverUrl) {
+        const coverPath = path.join(COVER_DIR, project.coverUrl.replace('/uploads/scratch-covers/', ''));
+        if (fs.existsSync(coverPath)) {
+          fs.unlinkSync(coverPath);
+        }
+      }
+    }
+
+    const result = await ScratchProject.deleteMany({ _id: { $in: ids } });
+
+    await logActivity({
+      action: 'batch_delete',
+      targetType: 'scratch_project',
+      targetId: ids,
+      targetName: `${ids.length} 个 Scratch 作品`,
+      description: `批量删除 ${result.deletedCount} 个 Scratch 作品`,
+      req
+    });
+
+    res.json({
+      status: 'success',
+      message: `已删除 ${result.deletedCount} 个作品`,
+      data: { deletedCount: result.deletedCount }
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 'error',
+      message: '批量删除失败'
     });
   }
 });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Plus, RefreshCw, X, Save, Upload, Star, StarOff, Play, Clock, Eye, Share2 } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, RefreshCw, X, Save, Upload, Star, StarOff, Play, Clock, Eye, Share2, CheckSquare, CheckCircle, Square } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import Pagination from '../../components/common/Pagination.jsx';
@@ -13,6 +13,7 @@ export default function ScratchManagement() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const [modalMode, setModalMode] = useState('add');
   const [deleteId, setDeleteId] = useState(null);
   const [page, setPage] = useState(1);
@@ -213,6 +214,53 @@ export default function ScratchManagement() {
     }
   };
 
+  // 批量选择处理
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === projects.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(projects.map((p) => p.id)));
+    }
+  };
+
+  // 批量通过
+  const handleBatchApprove = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await scratchAPI.batchApprove([...selectedIds]);
+      toast.success(`已通过 ${selectedIds.size} 个作品`);
+      setSelectedIds(new Set());
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || '批量通过失败');
+    }
+  };
+
+  // 批量删除
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await scratchAPI.batchDelete([...selectedIds]);
+      toast.success(`已删除 ${selectedIds.size} 个作品`);
+      setSelectedIds(new Set());
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || '批量删除失败');
+    }
+  };
+
   const statusBadge = (status) => {
     const map = {
       pending: { text: '待审核', color: 'text-amber-400 bg-amber-500/10' },
@@ -289,6 +337,30 @@ export default function ScratchManagement() {
           </div>
         </div>
 
+        {/* 批量操作栏 */}
+        {selectedIds.size > 0 && (
+          <div className="flex items-center justify-between p-3 bg-primary-500/10 border border-primary-500/20 rounded-lg">
+            <div className="flex items-center space-x-2 text-primary-400 text-sm">
+              <CheckSquare size={16} />
+              <span>已选择 {selectedIds.size} 个作品</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleBatchApprove}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
+              >
+                <CheckCircle size={14} /><span>批量通过</span>
+              </button>
+              <button
+                onClick={handleBatchDelete}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm transition-colors"
+              >
+                <Trash2 size={14} /><span>批量删除</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* 作品列表 */}
         <div className="card overflow-hidden">
           {isLoading ? (
@@ -303,20 +375,34 @@ export default function ScratchManagement() {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-800/30">
-                    <tr>
+                  <thead>
+                    <tr className="bg-gray-800/50 border-b border-gray-700/50">
+                      <th className="px-4 py-3 text-left">
+                        <button onClick={toggleSelectAll} className="text-gray-400 hover:text-white transition-colors">
+                          {selectedIds.size === projects.length && projects.length > 0
+                            ? <CheckSquare size={16} className="text-primary-400" />
+                            : <Square size={16} />}
+                        </button>
+                      </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作品</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作者</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">作品类型</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">教学小组</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">状态</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">浏览/点赞/分享</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">操作</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">操作</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800/50">
+                  <tbody className="divide-y divide-gray-700/50">
                     {projects.map((project) => (
-                      <tr key={project.id} className="hover:bg-gray-800/20 transition-colors">
+                      <tr key={project.id} className="hover:bg-gray-800/30 transition-colors">
+                        <td className="px-4 py-3">
+                          <button onClick={() => toggleSelect(project.id)} className="text-gray-400 hover:text-white transition-colors">
+                            {selectedIds.has(project.id)
+                              ? <CheckSquare size={16} className="text-primary-400" />
+                              : <Square size={16} />}
+                          </button>
+                        </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-9 rounded bg-gray-700/50 overflow-hidden flex-shrink-0">

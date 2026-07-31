@@ -217,7 +217,11 @@ export const scratchAPI = {
     };
   },
 
-  deleteProject: async (id) => api.delete(`/scratch/${id}`)
+  deleteProject: async (id) => api.delete(`/scratch/${id}`),
+
+  batchApprove: async (ids) => api.post('/scratch/batch/approve', { ids }),
+
+  batchDelete: async (ids) => api.post('/scratch/batch/delete', { ids })
 };
 
 // 学生相关 API

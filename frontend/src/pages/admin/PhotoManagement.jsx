@@ -5,11 +5,8 @@ import PhotoLightbox from '../../components/gallery/PhotoLightbox.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import Pagination from '../../components/common/Pagination.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
-import { photoAPI, studentAPI, groupAPI, isAuthError } from '../../services/api.js';
+import { photoAPI, studentAPI, groupAPI, categoryAPI, isAuthError } from '../../services/api.js';
 import { exportPhotos } from '../../utils/exportData.js';
-import { CATEGORIES } from '../../utils/sharedData.js';
-
-const categories = CATEGORIES;
 
 export default function PhotoManagement() {
   const [photos, setPhotos] = useState([]);
@@ -34,11 +31,12 @@ export default function PhotoManagement() {
   const [pageSize, setPageSize] = useState(20);
   const toast = useToast();
   const [groups, setGroups] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedGroupFilter, setSelectedGroupFilter] = useState('all');
   const [formData, setFormData] = useState({
     _id: null,
     title: '',
-    category: CATEGORIES[0],
+    category: '',
     author: '',
     grade: '',
     groupId: '',
@@ -56,6 +54,15 @@ export default function PhotoManagement() {
     groupAPI.getList?.().then((res) => {
       if (res?.data && Array.isArray(res.data)) {
         setGroups(res.data);
+      }
+    }).catch(() => {});
+  }, []);
+
+  // 动态加载作品类型列表（photo 类型）
+  useEffect(() => {
+    categoryAPI.getList('photo').then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        setCategories(res.data.map((c) => c.name));
       }
     }).catch(() => {});
   }, []);
@@ -202,7 +209,7 @@ export default function PhotoManagement() {
     setFormData({
       _id: null,
       title: '',
-      category: CATEGORIES[0],
+      category: categories[0] || '',
       author: students.length > 0 ? students[0].name : '',
       grade: students.length > 0 ? (students[0].grade || '') : '',
       groupId: '',

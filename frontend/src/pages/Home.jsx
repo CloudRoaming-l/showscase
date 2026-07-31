@@ -5,7 +5,7 @@ import PhotoCard from '../components/gallery/PhotoCard.jsx';
 import PhotoLightbox from '../components/gallery/PhotoLightbox.jsx';
 import { useToast } from '../components/common/Toast.jsx';
 import { photoAPI, studentAPI } from '../services/api.js';
-import { CATEGORIES } from '../utils/sharedData.js';
+import { getCategoryColor } from '../utils/sharedData.js';
 
 export default function Home() {
   const toast = useToast();
@@ -130,18 +130,10 @@ export default function Home() {
     { label: '作品类型', value: animatedStats.categories, suffix: '', icon: Sparkles, color: 'from-green-500 to-emerald-500' }
   ];
 
-  const categoryColors = [
-    'from-purple-500 to-blue-500',
-    'from-pink-500 to-red-500',
-    'from-yellow-500 to-orange-500',
-    'from-cyan-500 to-blue-500',
-    'from-violet-500 to-purple-500',
-    'from-emerald-500 to-teal-500',
-    'from-amber-500 to-yellow-500'
-  ];
-  const categories = CATEGORIES.map((cat, i) => ({
+  // 基于实际作品的分类计数动态生成分类列表（不再依赖硬编码 CATEGORIES）
+  const categories = Object.keys(categoryCounts).map((cat) => ({
     name: cat,
-    color: categoryColors[i] || categoryColors[0],
+    color: getCategoryColor(cat),
     count: categoryCounts[cat] || 0
   }));
 

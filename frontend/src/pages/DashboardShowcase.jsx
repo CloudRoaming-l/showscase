@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, ChevronLeft, ChevronRight, Play, Pause, Calendar, User, Tag, X, Code, Users, TrendingUp, CheckCircle, Maximize2, Minimize2, Sparkles, Star, Zap, Cpu, Radio } from 'lucide-react';
-import { photoAPI } from '../services/api.js';
-import { CATEGORIES } from '../utils/sharedData.js';
+import { photoAPI, categoryAPI } from '../services/api.js';
 
 export default function DashboardShowcase() {
   const [photos, setPhotos] = useState([]);
@@ -34,6 +33,7 @@ export default function DashboardShowcase() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [categories, setCategories] = useState([{ id: 'all', name: '全部作品' }]);
 
   const autoPlayRef = useRef(null);
   const progressRef = useRef(null);
@@ -41,14 +41,18 @@ export default function DashboardShowcase() {
   const thumbStripRef = useRef(null);
   const AUTO_PLAY_INTERVAL = 6000;
 
-  const categories = [
-    { id: 'all', name: '全部作品' },
-    ...CATEGORIES.map((cat) => ({ id: cat, name: cat }))
-  ];
-
   useEffect(() => {
     loadData();
     loadStats();
+    // 动态加载作品类型列表
+    categoryAPI.getList('photo').then((res) => {
+      if (res?.data && Array.isArray(res.data)) {
+        setCategories([
+          { id: 'all', name: '全部作品' },
+          ...res.data.map((c) => ({ id: c.name, name: c.name }))
+        ]);
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {

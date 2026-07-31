@@ -5,7 +5,6 @@ import PhotoCard from '../components/gallery/PhotoCard.jsx';
 import PhotoLightbox from '../components/gallery/PhotoLightbox.jsx';
 import { photoAPI, groupAPI } from '../services/api.js';
 import { getFavorites } from '../utils/interaction';
-import { CATEGORIES } from '../utils/sharedData.js';
 
 export default function Gallery() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,10 +17,7 @@ export default function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [page, setPage] = useState(() => parseInt(searchParams.get('page'), 10) || 1);
   const [totalPages, setTotalPages] = useState(1);
-  const [categories, setCategories] = useState([
-    { id: 'all', name: '全部作品' },
-    ...CATEGORIES.map((cat) => ({ id: cat, name: cat }))
-  ]);
+  const [categories, setCategories] = useState([{ id: 'all', name: '全部作品' }]);
   const [groups, setGroups] = useState([{ id: 'all', name: '全部教学小组' }]);
   const [selectedGroupId, setSelectedGroupId] = useState('all');
 
