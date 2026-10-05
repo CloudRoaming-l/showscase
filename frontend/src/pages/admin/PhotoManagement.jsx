@@ -431,9 +431,9 @@ export default function PhotoManagement() {
 
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { label: '待审核', class: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-      approved: { label: '已通过', class: 'bg-green-500/10 text-green-400 border-green-500/20' },
-      rejected: { label: '已拒绝', class: 'bg-red-500/10 text-red-400 border-red-500/20' }
+      pending: { label: '待审核', class: 'bg-gray-200/10 text-gray-400 border-gray-600/50' },
+      approved: { label: '已通过', class: 'bg-gray-700 text-gray-200 border-gray-600' },
+      rejected: { label: '已拒绝', class: 'bg-gray-800/50 text-gray-500 border-gray-700/50' }
     };
     const badge = badges[status] || badges.pending;
     return (
@@ -452,7 +452,7 @@ export default function PhotoManagement() {
             onClick={() => setStatusFilter('all')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               statusFilter === 'all'
-                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/20'
+                ? 'bg-gray-900 text-white border border-gray-700'
                 : 'bg-gray-800/60 text-gray-400 border border-gray-700/50 hover:bg-gray-700/50'
             }`}
           >
@@ -462,7 +462,7 @@ export default function PhotoManagement() {
             onClick={() => setStatusFilter('pending')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
               statusFilter === 'pending'
-                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/20'
+                ? 'bg-gray-700 text-gray-200 border border-gray-600'
                 : 'bg-gray-800/60 text-gray-400 border border-gray-700/50 hover:bg-gray-700/50'
             }`}
           >
@@ -473,7 +473,7 @@ export default function PhotoManagement() {
             onClick={() => setStatusFilter('approved')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
               statusFilter === 'approved'
-                ? 'bg-green-500/20 text-green-400 border border-green-500/20'
+                ? 'bg-gray-900 text-white border border-gray-700'
                 : 'bg-gray-800/60 text-gray-400 border border-gray-700/50 hover:bg-gray-700/50'
             }`}
           >
@@ -484,7 +484,7 @@ export default function PhotoManagement() {
             onClick={() => setStatusFilter('rejected')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
               statusFilter === 'rejected'
-                ? 'bg-red-500/20 text-red-400 border border-red-500/20'
+                ? 'bg-gray-800 text-gray-400 border border-gray-700'
                 : 'bg-gray-800/60 text-gray-400 border border-gray-700/50 hover:bg-gray-700/50'
             }`}
           >
@@ -502,7 +502,7 @@ export default function PhotoManagement() {
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="搜索作品名称或作者..."
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
+              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
             />
           </div>
 
@@ -510,7 +510,7 @@ export default function PhotoManagement() {
             <select
               value={activeFilter}
               onChange={(e) => setActiveFilter(e.target.value)}
-              className="bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary-500"
+              className="bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-gray-500"
             >
               <option value="all">全部作品类型</option>
               {categories.map((cat) => (
@@ -520,14 +520,14 @@ export default function PhotoManagement() {
             <select
               value={selectedGroupFilter}
               onChange={(e) => setSelectedGroupFilter(e.target.value)}
-              className="bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary-500"
+              className="bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-gray-500"
             >
               <option value="all">全部教学小组</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </select>
-            <button onClick={handleAdd} className="flex items-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20">
+            <button onClick={handleAdd} className="flex items-center space-x-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium">
               <Plus size={16} /><span>添加作品</span>
             </button>
             <button onClick={loadData} className="p-2.5 bg-gray-800/60 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition-colors">
@@ -535,14 +535,14 @@ export default function PhotoManagement() {
             </button>
             <button
               onClick={() => exportPhotos(filteredPhotos)}
-              className="flex items-center space-x-2 px-4 py-2.5 bg-green-500/80 hover:bg-green-500 text-white rounded-lg transition-colors text-sm font-medium"
+              className="flex items-center space-x-2 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium"
               title="导出为 CSV"
             >
               <Download size={16} /><span>导出</span>
             </button>
             <button
               onClick={() => setShowImportModal(true)}
-              className="flex items-center space-x-2 px-4 py-2.5 bg-purple-500/80 hover:bg-purple-500 text-white rounded-lg transition-colors text-sm font-medium"
+              className="flex items-center space-x-2 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium"
               title="批量导入"
             >
               <Upload size={16} /><span>导入</span>
@@ -552,21 +552,21 @@ export default function PhotoManagement() {
 
         {/* 批量操作栏 */}
         {selectedIds.size > 0 && (
-          <div className="flex items-center justify-between p-3 bg-primary-500/10 border border-primary-500/20 rounded-lg">
-            <div className="flex items-center space-x-2 text-primary-400 text-sm">
+          <div className="flex items-center justify-between p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
+            <div className="flex items-center space-x-2 text-gray-300 text-sm">
               <CheckSquare size={16} />
               <span>已选择 {selectedIds.size} 个作品</span>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleBatchApprove}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg text-sm transition-colors"
               >
                 <CheckCircle size={14} /><span>批量通过</span>
               </button>
               <button
                 onClick={handleBatchDelete}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded-lg text-sm transition-colors"
               >
                 <Trash2 size={14} /><span>批量删除</span>
               </button>
@@ -583,7 +583,7 @@ export default function PhotoManagement() {
                   <th className="px-4 py-3 text-left">
                     <button onClick={toggleSelectAll} className="text-gray-400 hover:text-white transition-colors">
                       {selectedIds.size === filteredPhotos.length && filteredPhotos.length > 0
-                        ? <CheckSquare size={16} className="text-primary-400" />
+                        ? <CheckSquare size={16} className="text-white" />
                         : <Square size={16} />}
                     </button>
                   </th>
@@ -625,7 +625,7 @@ export default function PhotoManagement() {
                       <td className="px-4 py-3">
                         <button onClick={() => toggleSelect(photo.id || photo._id)} className="text-gray-400 hover:text-white transition-colors">
                           {selectedIds.has(photo.id || photo._id)
-                            ? <CheckSquare size={16} className="text-primary-400" />
+                            ? <CheckSquare size={16} className="text-white" />
                             : <Square size={16} />}
                         </button>
                       </td>
@@ -634,12 +634,12 @@ export default function PhotoManagement() {
                           <img
                             src={photo.imageUrl}
                             alt={photo.title}
-                            className="w-10 h-10 rounded-lg object-cover cursor-pointer border border-gray-700/50 hover:border-primary-500/50 transition-colors"
+                            className="w-10 h-10 rounded-lg object-cover cursor-pointer border border-gray-700/50 hover:border-gray-500 transition-colors"
                             onClick={() => setSelectedPhoto(photo)}
                           />
                           <div className="min-w-0">
                             <span className="text-white font-medium text-sm truncate block">{photo.title}</span>
-                            {photo.isFeatured && <Star size={12} className="text-yellow-400 mt-0.5" />}
+                            {photo.isFeatured && <Star size={12} className="text-gray-400 mt-0.5" />}
                           </div>
                         </div>
                       </td>
@@ -652,7 +652,7 @@ export default function PhotoManagement() {
                         {(() => {
                           const g = groups.find(g => g.id === photo.groupId);
                           return g ? (
-                            <span className="inline-flex px-2 py-1 bg-primary-500/10 text-primary-400 rounded text-xs">
+                            <span className="inline-flex px-2 py-1 bg-gray-700/50 text-gray-300 rounded text-xs">
                               {g.name}
                             </span>
                           ) : <span className="text-gray-600 text-xs">-</span>;
@@ -665,10 +665,10 @@ export default function PhotoManagement() {
                         <div className="flex items-center justify-center space-x-1">
                           {photo.status === 'pending' && (
                             <>
-                              <button onClick={() => handleApprove(photo.id || photo._id)} className="p-1.5 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors" title="通过">
+                              <button onClick={() => handleApprove(photo.id || photo._id)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors" title="通过">
                                 <CheckCircle size={14} />
                               </button>
-                              <button onClick={() => { setRejectTargetId(photo.id || photo._id); setShowRejectModal(true); }} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="拒绝">
+                              <button onClick={() => { setRejectTargetId(photo.id || photo._id); setShowRejectModal(true); }} className="p-1.5 text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors" title="拒绝">
                                 <XCircle size={14} />
                               </button>
                             </>
@@ -676,13 +676,13 @@ export default function PhotoManagement() {
                           <button onClick={() => setSelectedPhoto(photo)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors" title="查看">
                             <Eye size={14} />
                           </button>
-                          <button onClick={() => handleToggleFeatured(photo)} className={`p-1.5 rounded-lg transition-colors ${photo.isFeatured ? 'text-yellow-400 bg-yellow-500/10' : 'text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/10'}`} title={photo.isFeatured ? '取消精选' : '设为精选'}>
+                          <button onClick={() => handleToggleFeatured(photo)} className={`p-1.5 rounded-lg transition-colors ${photo.isFeatured ? 'text-gray-300 bg-gray-700/50' : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700/50'}`} title={photo.isFeatured ? '取消精选' : '设为精选'}>
                             {photo.isFeatured ? <Star size={14} className="fill-current" /> : <StarOff size={14} />}
                           </button>
-                          <button onClick={() => handleEdit(photo)} className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors" title="编辑">
+                          <button onClick={() => handleEdit(photo)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors" title="编辑">
                             <Edit size={14} />
                           </button>
-                          <button onClick={() => setDeleteId(photo.id || photo._id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="删除">
+                          <button onClick={() => setDeleteId(photo.id || photo._id)} className="p-1.5 text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors" title="删除">
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -716,12 +716,12 @@ export default function PhotoManagement() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">作品名称 <span className="text-red-400">*</span></label>
-                  <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.title ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'}`} placeholder="请输入作品名称" />
+                  <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.title ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'}`} placeholder="请输入作品名称" />
                   {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">作品类型</label>
-                  <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500">
+                  <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500">
                     {categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
                   </select>
                 </div>
@@ -729,7 +729,7 @@ export default function PhotoManagement() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">作者 <span className="text-red-400">*</span></label>
-                  <select value={formData.author} onChange={(e) => handleAuthorChange(e.target.value)} className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.author ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'}`}>
+                  <select value={formData.author} onChange={(e) => handleAuthorChange(e.target.value)} className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.author ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'}`}>
                     <option value="">选择作者</option>
                     {students.map((student) => (<option key={student.id || student._id} value={student.name}>{student.name} ({student.className || '-'})</option>))}
                   </select>
@@ -737,13 +737,13 @@ export default function PhotoManagement() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">年级</label>
-                  <input type="text" value={formData.grade} readOnly className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 opacity-60" placeholder="自动从学生信息获取" />
+                  <input type="text" value={formData.grade} readOnly className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 opacity-60" placeholder="自动从学生信息获取" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">教学小组</label>
-                  <select value={formData.groupId} onChange={(e) => setFormData({ ...formData, groupId: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500">
+                  <select value={formData.groupId} onChange={(e) => setFormData({ ...formData, groupId: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500">
                     <option value="">请选择小组</option>
                     {groups.map((g) => (<option key={g.id} value={g.id}>{g.name}</option>))}
                   </select>
@@ -752,8 +752,8 @@ export default function PhotoManagement() {
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">作品图片 <span className="text-red-400">*</span></label>
                 <div className="flex items-center space-x-2 flex-wrap gap-2">
-                  <input type="text" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} className={`flex-1 min-w-[200px] bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.imageUrl ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'}`} placeholder="请输入图片URL或点击上传" />
-                  <label className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg cursor-pointer transition-colors text-sm ${uploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-500'} text-white`}>
+                  <input type="text" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} className={`flex-1 min-w-[200px] bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${errors.imageUrl ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'}`} placeholder="请输入图片URL或点击上传" />
+                  <label className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg cursor-pointer transition-colors text-sm ${uploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-gray-700 hover:bg-gray-600'} text-white`}>
                     <ImageIcon size={14} />
                     <span>{uploading ? '上传中...' : '上传图片'}</span>
                     <input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} className="hidden" />
@@ -766,16 +766,16 @@ export default function PhotoManagement() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">作品描述</label>
-                <textarea rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 resize-none" placeholder="请输入作品描述..." />
+                <textarea rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 resize-none" placeholder="请输入作品描述..." />
               </div>
               <div className="flex items-center space-x-2">
-                <input type="checkbox" id="isFeatured" checked={formData.isFeatured} onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })} className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-primary-500 focus:ring-primary-500" />
+                <input type="checkbox" id="isFeatured" checked={formData.isFeatured} onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })} className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-gray-900 focus:ring-gray-500" />
                 <label htmlFor="isFeatured" className="text-gray-300 text-sm">设为精选作品</label>
               </div>
             </div>
             <div className="flex space-x-2 p-5 border-t border-gray-700/50">
               <button onClick={() => setShowModal(false)} className="flex-1 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium">取消</button>
-              <button onClick={handleSave} className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20"><Save size={14} /><span>保存</span></button>
+              <button onClick={handleSave} className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium"><Save size={14} /><span>保存</span></button>
             </div>
           </div>
         </div>
@@ -792,12 +792,12 @@ export default function PhotoManagement() {
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">拒绝原因（可选）</label>
-                <textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 resize-none" placeholder="请输入拒绝原因，帮助作者改进..." />
+                <textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 resize-none" placeholder="请输入拒绝原因，帮助作者改进..." />
               </div>
             </div>
             <div className="flex space-x-2 p-5 border-t border-gray-700/50">
               <button onClick={() => setShowRejectModal(false)} className="flex-1 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium">取消</button>
-              <button onClick={handleReject} className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-red-500/20"><XCircle size={14} /><span>确认拒绝</span></button>
+              <button onClick={handleReject} className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm font-medium"><XCircle size={14} /><span>确认拒绝</span></button>
             </div>
           </div>
         </div>
@@ -818,26 +818,26 @@ export default function PhotoManagement() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-sm font-medium text-gray-300">导入数据（JSON 数组）</label>
-                  <button onClick={handleParseCSV} className="text-xs text-primary-400 hover:text-primary-300">转换为 JSON</button>
+                  <button onClick={handleParseCSV} className="text-xs text-gray-400 hover:text-gray-300">转换为 JSON</button>
                 </div>
                 <textarea
                   rows={12}
                   value={importData}
                   onChange={(e) => setImportData(e.target.value)}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 resize-none font-mono"
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 resize-none font-mono"
                   placeholder={'[\n  {"title": "作品名称", "category": "机器人编程", "author": "作者", "imageUrl": "图片URL"},\n  ...\n]'}
                 />
                 <p className="text-xs text-gray-500 mt-1">支持 JSON 数组格式，或粘贴 CSV 数据后点击"转换为 JSON"</p>
               </div>
               {importResult && (
-                <div className={`p-3 rounded-lg ${importResult.success > 0 ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
-                  <p className={`text-sm ${importResult.success > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <div className={`p-3 rounded-lg ${importResult.success > 0 ? 'bg-gray-700/50 border border-gray-600' : 'bg-gray-800/50 border border-gray-700'}`}>
+                  <p className={`text-sm ${importResult.success > 0 ? 'text-gray-200' : 'text-gray-400'}`}>
                     {importResult.success > 0 ? `成功导入 ${importResult.success} 个作品` : '导入失败'}
                   </p>
                   {importResult.warnings && importResult.warnings.details && (
                     <div className="mt-2">
-                      <p className="text-xs text-yellow-400">失败原因：</p>
-                      <ul className="text-xs text-yellow-400/80 mt-1 list-disc list-inside">
+                      <p className="text-xs text-gray-400">失败原因：</p>
+                      <ul className="text-xs text-gray-500 mt-1 list-disc list-inside">
                         {importResult.warnings.details.slice(0, 5).map((err, i) => (
                           <li key={i}>{err}</li>
                         ))}
@@ -854,7 +854,7 @@ export default function PhotoManagement() {
             </div>
             <div className="flex space-x-2 p-5 border-t border-gray-700/50">
               <button onClick={() => { setShowImportModal(false); setImportData(''); setImportResult(null); }} className="flex-1 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium">取消</button>
-              <button onClick={handleImport} className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20"><Upload size={14} /><span>开始导入</span></button>
+              <button onClick={handleImport} className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium"><Upload size={14} /><span>开始导入</span></button>
             </div>
           </div>
         </div>

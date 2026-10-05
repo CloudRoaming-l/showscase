@@ -47,6 +47,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       ADMIN_NAME: ${ADMIN_NAME:-管理员}
+      HARDWARE_KIT_PASSWORD: ${HARDWARE_KIT_PASSWORD:-liulaoshi2026}
     depends_on:
       mongodb:
         condition: service_healthy

@@ -18,15 +18,15 @@ const actionLabels = {
 };
 
 const actionColors = {
-  create: 'text-green-400 bg-green-500/10',
-  update: 'text-blue-400 bg-blue-500/10',
-  delete: 'text-red-400 bg-red-500/10',
-  approve: 'text-green-400 bg-green-500/10',
-  reject: 'text-red-400 bg-red-500/10',
-  batch_approve: 'text-green-400 bg-green-500/10',
-  batch_delete: 'text-red-400 bg-red-500/10',
-  login: 'text-purple-400 bg-purple-500/10',
-  other: 'text-gray-400 bg-gray-500/10'
+  create: 'text-gray-200 bg-gray-700',
+  update: 'text-gray-300 bg-gray-700/50',
+  delete: 'text-gray-500 bg-gray-800/50',
+  approve: 'text-gray-200 bg-gray-700',
+  reject: 'text-gray-500 bg-gray-800/50',
+  batch_approve: 'text-gray-200 bg-gray-700',
+  batch_delete: 'text-gray-500 bg-gray-800/50',
+  login: 'text-gray-300 bg-gray-700/50',
+  other: 'text-gray-400 bg-gray-800/50'
 };
 
 const targetTypeLabels = {
@@ -138,19 +138,19 @@ export default function ActivityLogManagement() {
       <div className="space-y-4">
         {/* 统计卡片 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="card p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+          <div className="card p-4 bg-gray-800/50 border border-gray-700">
             <div className="text-2xl font-bold text-white">{stats.total}</div>
             <div className="text-gray-400 text-sm">总操作次数</div>
           </div>
-          <div className="card p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+          <div className="card p-4 bg-gray-800/50 border border-gray-700">
             <div className="text-2xl font-bold text-white">{stats.today}</div>
             <div className="text-gray-400 text-sm">今日操作</div>
           </div>
-          <div className="card p-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+          <div className="card p-4 bg-gray-800/50 border border-gray-700">
             <div className="text-2xl font-bold text-white">{stats.byAction?.length || 0}</div>
             <div className="text-gray-400 text-sm">操作类型</div>
           </div>
-          <div className="card p-4 bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-yellow-500/20">
+          <div className="card p-4 bg-gray-800/50 border border-gray-700">
             <div className="text-2xl font-bold text-white">{stats.byTargetType?.length || 0}</div>
             <div className="text-gray-400 text-sm">涉及对象</div>
           </div>
@@ -165,7 +165,7 @@ export default function ActivityLogManagement() {
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="搜索操作人..."
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
+              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
             />
           </div>
 

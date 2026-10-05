@@ -170,14 +170,14 @@ export default function StudentManagement() {
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="搜索学生姓名或班级..."
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
+              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
             />
           </div>
 
           <div className="flex items-center space-x-2">
             <button
               onClick={handleAdd}
-              className="flex items-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20"
+              className="flex items-center space-x-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium"
             >
               <Plus size={16} />
               <span>添加学生</span>
@@ -233,7 +233,7 @@ export default function StudentManagement() {
                     <tr key={student._id || student.id} className="hover:bg-gray-800/30 transition-colors">
                       <td className="px-5 py-3">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
                             <User size={16} className="text-white" />
                           </div>
                           <span className="text-white font-medium text-sm">{student.name}</span>
@@ -246,7 +246,7 @@ export default function StudentManagement() {
                         {student.joinDate || (student.createdAt ? student.createdAt.split('T')[0] : '-')}
                       </td>
                       <td className="px-5 py-3 text-center">
-                        <span className="inline-flex px-2 py-1 bg-primary-500/10 text-primary-400 rounded text-xs font-medium">
+                        <span className="inline-flex px-2 py-1 bg-gray-700/50 text-gray-300 rounded text-xs font-medium">
                           {getWorkCount(student.name)}
                         </span>
                       </td>
@@ -254,14 +254,14 @@ export default function StudentManagement() {
                         <div className="flex items-center justify-center space-x-1">
                           <button
                             onClick={() => handleEdit(student)}
-                            className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
                             title="编辑"
                           >
                             <Edit size={14} />
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(student._id || student.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
                             title="删除"
                           >
                             <Trash2 size={14} />
@@ -307,7 +307,7 @@ export default function StudentManagement() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${
-                    errors.name ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
+                    errors.name ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'
                   }`}
                   placeholder="请输入学生姓名"
                 />
@@ -323,7 +323,7 @@ export default function StudentManagement() {
                     value={formData.grade}
                     onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                     className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${
-                      errors.grade ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
+                      errors.grade ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'
                     }`}
                   >
                     <option value="">选择年级</option>
@@ -346,7 +346,7 @@ export default function StudentManagement() {
                     value={formData.className}
                     onChange={(e) => setFormData({ ...formData, className: e.target.value })}
                     className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none transition-colors ${
-                      errors.className ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
+                      errors.className ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'
                     }`}
                     placeholder="如：编程一班"
                   />
@@ -361,7 +361,7 @@ export default function StudentManagement() {
                 <select
                   value={formData.groupId}
                   onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                 >
                   <option value="">请选择教学小组</option>
                   {groups.map((group) => (
@@ -376,7 +376,7 @@ export default function StudentManagement() {
                   type="text"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                   placeholder="如：138****1234"
                 />
               </div>
@@ -387,7 +387,7 @@ export default function StudentManagement() {
                   type="date"
                   value={formData.joinDate}
                   onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                 />
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function StudentManagement() {
               </button>
               <button
                 onClick={handleSave}
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20"
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium"
               >
                 <Save size={14} />
                 <span>保存</span>

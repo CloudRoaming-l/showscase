@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Eye, Heart, Share2, Play, Sparkles, Clock, Filter, ChevronDown, Users } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Search, Eye, Heart, Share2, Play, Clock, Filter, ChevronDown, Users, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { scratchAPI, categoryAPI, groupAPI } from '../services/api.js';
 import { useToast } from '../components/common/Toast.jsx';
 import Pagination from '../components/common/Pagination.jsx';
@@ -26,7 +26,6 @@ export default function ScratchGallery() {
     fetchProjects();
   }, [page, selectedCategory, sortBy, selectedGroupId]);
 
-  // 从后端拉取作品类型与教学小组列表
   useEffect(() => {
     categoryAPI.getList('scratch').then((res) => {
       if (res?.data && Array.isArray(res.data)) {
@@ -43,7 +42,6 @@ export default function ScratchGallery() {
     }).catch(() => {});
   }, []);
 
-  // 搜索防抖：输入停止 500ms 后自动搜索
   useEffect(() => {
     const timer = setTimeout(() => {
       if (page !== 1) {
@@ -119,37 +117,31 @@ export default function ScratchGallery() {
       <div className="container mx-auto max-w-6xl">
         {/* 顶部标题 */}
         <div className="mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
-                  <Play size={24} className="text-white" />
-                </span>
-                Scratch 编程作品
-              </h1>
-              <p className="text-gray-400">
-                运行并体验学生们创作的 Scratch 互动作品，共 <span className="text-primary-400 font-medium">{totalCount}</span> 个作品
-              </p>
-            </div>
-          </div>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1 flex items-center gap-2">
+            <Play size={20} className="text-gray-700" />
+            Scratch 编程作品
+          </h1>
+          <p className="text-sm text-gray-500">
+            运行并体验学生们创作的 Scratch 互动作品，共 {totalCount} 个作品
+          </p>
         </div>
 
         {/* 搜索和筛选栏 */}
-        <div className="card p-4 mb-6 relative z-30">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-3">
             {/* 搜索框 */}
             <form onSubmit={handleSearch} className="flex-1">
               <div className="relative">
                 <Search
-                  size={20}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="搜索作品名称、作者..."
-                  className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-400 focus:bg-white transition-colors"
                 />
               </div>
             </form>
@@ -158,23 +150,23 @@ export default function ScratchGallery() {
             <div className="relative">
               <button
                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                className="flex items-center gap-2 px-5 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white hover:bg-gray-700/50 transition-colors min-w-[140px]"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-colors min-w-[120px]"
               >
-                <Filter size={18} />
+                <Filter size={14} />
                 <span className="flex-1 text-left">{currentCategoryLabel}</span>
-                <ChevronDown size={16} className={showCategoryDropdown ? 'rotate-180' : ''} />
+                <ChevronDown size={14} className={showCategoryDropdown ? 'rotate-180' : ''} />
               </button>
 
               {showCategoryDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-xl shadow-xl border border-gray-700 z-50 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-sm z-50 overflow-hidden">
                   {categories.map((cat) => (
                     <button
                       key={cat.value}
                       onClick={() => handleCategoryChange(cat.value)}
-                      className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors ${
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors ${
                         selectedCategory === cat.value
-                          ? 'text-primary-400 bg-gray-700/50'
-                          : 'text-gray-300'
+                          ? 'text-gray-900 bg-gray-100 font-medium'
+                          : 'text-gray-600'
                       }`}
                     >
                       {cat.label}
@@ -188,23 +180,23 @@ export default function ScratchGallery() {
             <div className="relative">
               <button
                 onClick={() => setShowGroupDropdown(!showGroupDropdown)}
-                className="flex items-center gap-2 px-5 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white hover:bg-gray-700/50 transition-colors min-w-[140px]"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-colors min-w-[140px]"
               >
-                <Users size={18} />
+                <Users size={14} />
                 <span className="flex-1 text-left">{currentGroupLabel}</span>
-                <ChevronDown size={16} className={showGroupDropdown ? 'rotate-180' : ''} />
+                <ChevronDown size={14} className={showGroupDropdown ? 'rotate-180' : ''} />
               </button>
 
               {showGroupDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-xl shadow-xl border border-gray-700 z-50 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-sm z-50 overflow-hidden">
                   {groups.map((g) => (
                     <button
                       key={g.value}
                       onClick={() => handleGroupChange(g.value)}
-                      className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors ${
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors ${
                         selectedGroupId === g.value
-                          ? 'text-primary-400 bg-gray-700/50'
-                          : 'text-gray-300'
+                          ? 'text-gray-900 bg-gray-100 font-medium'
+                          : 'text-gray-600'
                       }`}
                     >
                       {g.label}
@@ -215,27 +207,27 @@ export default function ScratchGallery() {
             </div>
 
             {/* 排序 */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setSortBy('newest')}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm transition-colors ${
                   sortBy === 'newest'
-                    ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                    : 'bg-gray-800/50 text-gray-400 border border-gray-700/50 hover:bg-gray-700/50'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100'
                 }`}
               >
-                <Clock size={18} />
+                <Clock size={14} />
                 <span>最新</span>
               </button>
               <button
                 onClick={() => setSortBy('popular')}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm transition-colors ${
                   sortBy === 'popular'
-                    ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                    : 'bg-gray-800/50 text-gray-400 border border-gray-700/50 hover:bg-gray-700/50'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100'
                 }`}
               >
-                <Sparkles size={18} />
+                <Sparkles size={14} />
                 <span>热门</span>
               </button>
             </div>
@@ -244,16 +236,16 @@ export default function ScratchGallery() {
 
         {/* 作品列表 */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="card animate-pulse">
-                <div className="aspect-video bg-gray-700/50 rounded-t-xl" />
-                <div className="p-4 space-y-3">
-                  <div className="h-5 bg-gray-700/50 rounded w-3/4" />
-                  <div className="h-4 bg-gray-700/50 rounded w-1/2" />
-                  <div className="flex gap-3">
-                    <div className="h-4 bg-gray-700/50 rounded w-12" />
-                    <div className="h-4 bg-gray-700/50 rounded w-12" />
+              <div key={i} className="bg-white border border-gray-200 rounded-md overflow-hidden animate-pulse">
+                <div className="aspect-video bg-gray-100" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-gray-100 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  <div className="flex gap-3 pt-1">
+                    <div className="h-3 bg-gray-100 rounded w-10" />
+                    <div className="h-3 bg-gray-100 rounded w-10" />
                   </div>
                 </div>
               </div>
@@ -261,67 +253,68 @@ export default function ScratchGallery() {
           </div>
         ) : projects.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {projects.map((project) => (
                 <div
                   key={project.id}
                   onClick={() => navigate(`/scratch/${project.id}`)}
-                  className="card cursor-pointer hover:scale-[1.02] hover:border-primary-500/30 transition-all duration-300 group"
+                  className="bg-white border border-gray-200 rounded-md overflow-hidden cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all group"
                 >
                   {/* 封面 */}
-                  <div className="relative aspect-video overflow-hidden rounded-t-xl bg-gradient-to-br from-gray-800 to-gray-900">
+                  <div className="relative aspect-video overflow-hidden bg-gray-100">
                     {project.coverUrl ? (
                       <img
                         src={project.coverUrl}
                         alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400/20 to-pink-500/20">
-                        <Play size={48} className="text-white/40" />
+                      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                        <Play size={36} className="text-gray-300" />
                       </div>
                     )}
 
                     {/* 播放按钮遮罩 */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
-                      <div className="w-14 h-14 rounded-full bg-white/0 group-hover:bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
-                        <Play size={28} className="text-white ml-1" />
+                      <div className="w-12 h-12 rounded-full bg-white/0 group-hover:bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                        <Play size={24} className="text-white ml-0.5" />
                       </div>
                     </div>
 
                     {/* 精选标签 */}
                     {project.isFeatured && (
-                      <div className="absolute top-3 left-3 px-2.5 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full flex items-center gap-1">
-                        <Sparkles size={12} />
-                        <span>精选</span>
+                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-gray-900 text-white text-xs rounded">
+                        精选
                       </div>
                     )}
 
                     {/* 作品类型标签 */}
-                    <div className="absolute top-3 right-3 px-2.5 py-1 bg-black/60 backdrop-blur-sm text-white text-xs rounded-full">
+                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 text-white text-xs rounded">
                       {project.category}
                     </div>
                   </div>
 
                   {/* 信息 */}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-white mb-2 truncate group-hover:text-primary-400 transition-colors">
+                  <div className="p-3">
+                    <h3 className="font-medium text-gray-900 mb-1 truncate text-sm">
                       {project.title}
                     </h3>
-                    <p className="text-sm text-gray-400 mb-3">
+                    <p className="text-xs text-gray-500 mb-2">
                       作者：{project.author}
                     </p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
                       <span className="flex items-center gap-1">
-                        <Eye size={14} />
+                        <Eye size={12} />
                         {formatCount(project.viewCount || 0)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Heart size={14} />
+                        <Heart size={12} />
                         {formatCount(project.likeCount || 0)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Share2 size={14} />
+                        <Share2 size={12} />
                         {formatCount(project.shareCount || 0)}
                       </span>
                     </div>
@@ -332,7 +325,7 @@ export default function ScratchGallery() {
 
             {/* 分页 */}
             {totalPages > 1 && (
-              <div className="mt-10">
+              <div className="mt-8">
                 <Pagination
                   currentPage={page}
                   totalPages={totalPages}
@@ -342,12 +335,12 @@ export default function ScratchGallery() {
             )}
           </>
         ) : (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gray-800/50 flex items-center justify-center">
-              <Play size={40} className="text-gray-600" />
+          <div className="text-center py-16">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-gray-100 flex items-center justify-center">
+              <Play size={28} className="text-gray-300" />
             </div>
-            <p className="text-gray-400 text-lg mb-2">暂无作品</p>
-            <p className="text-gray-500 text-sm">搜索其他关键词或换个作品类型试试吧</p>
+            <p className="text-gray-600 text-base mb-1">暂无作品</p>
+            <p className="text-gray-400 text-sm">搜索其他关键词或换个作品类型试试吧</p>
           </div>
         )}
       </div>

@@ -263,9 +263,9 @@ export default function ScratchManagement() {
 
   const statusBadge = (status) => {
     const map = {
-      pending: { text: '待审核', color: 'text-amber-400 bg-amber-500/10' },
-      approved: { text: '已通过', color: 'text-emerald-400 bg-emerald-500/10' },
-      rejected: { text: '已拒绝', color: 'text-red-400 bg-red-500/10' }
+      pending: { text: '待审核', color: 'text-gray-400 bg-gray-700/50' },
+      approved: { text: '已通过', color: 'text-gray-200 bg-gray-700' },
+      rejected: { text: '已拒绝', color: 'text-gray-500 bg-gray-800/50' }
     };
     const info = map[status] || map.pending;
     return (
@@ -293,7 +293,7 @@ export default function ScratchManagement() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={handleSearch}
                   placeholder="搜索作品名称、作者..."
-                  className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500/50 text-sm"
+                  className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 text-sm"
                 />
               </div>
               <button
@@ -309,7 +309,7 @@ export default function ScratchManagement() {
               <select
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-                className="px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500/50"
+                className="px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white text-sm focus:outline-none focus:border-gray-500"
               >
                 <option value="all">全部状态</option>
                 <option value="pending">待审核</option>
@@ -319,7 +319,7 @@ export default function ScratchManagement() {
               <select
                 value={categoryFilter}
                 onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
-                className="px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500/50"
+                className="px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white text-sm focus:outline-none focus:border-gray-500"
               >
                 <option value="all">全部作品类型</option>
                 {categories.map((c) => (
@@ -328,7 +328,7 @@ export default function ScratchManagement() {
               </select>
               <button
                 onClick={openAddModal}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium"
               >
                 <Plus size={18} />
                 添加作品
@@ -339,21 +339,21 @@ export default function ScratchManagement() {
 
         {/* 批量操作栏 */}
         {selectedIds.size > 0 && (
-          <div className="flex items-center justify-between p-3 bg-primary-500/10 border border-primary-500/20 rounded-lg">
-            <div className="flex items-center space-x-2 text-primary-400 text-sm">
+          <div className="flex items-center justify-between p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
+            <div className="flex items-center space-x-2 text-gray-300 text-sm">
               <CheckSquare size={16} />
               <span>已选择 {selectedIds.size} 个作品</span>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleBatchApprove}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg text-sm transition-colors"
               >
                 <CheckCircle size={14} /><span>批量通过</span>
               </button>
               <button
                 onClick={handleBatchDelete}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded-lg text-sm transition-colors"
               >
                 <Trash2 size={14} /><span>批量删除</span>
               </button>
@@ -380,7 +380,7 @@ export default function ScratchManagement() {
                       <th className="px-4 py-3 text-left">
                         <button onClick={toggleSelectAll} className="text-gray-400 hover:text-white transition-colors">
                           {selectedIds.size === projects.length && projects.length > 0
-                            ? <CheckSquare size={16} className="text-primary-400" />
+                            ? <CheckSquare size={16} className="text-white" />
                             : <Square size={16} />}
                         </button>
                       </th>
@@ -399,7 +399,7 @@ export default function ScratchManagement() {
                         <td className="px-4 py-3">
                           <button onClick={() => toggleSelect(project.id)} className="text-gray-400 hover:text-white transition-colors">
                             {selectedIds.has(project.id)
-                              ? <CheckSquare size={16} className="text-primary-400" />
+                              ? <CheckSquare size={16} className="text-white" />
                               : <Square size={16} />}
                           </button>
                         </td>
@@ -418,7 +418,7 @@ export default function ScratchManagement() {
                               <p className="text-white text-sm font-medium truncate max-w-[200px]">
                                 {project.title}
                                 {project.isFeatured && (
-                                  <Star size={14} className="inline ml-1 text-yellow-400 fill-yellow-400" />
+                                  <Star size={14} className="inline ml-1 text-gray-300 fill-gray-300" />
                                 )}
                               </p>
                               <p className="text-gray-500 text-xs">
@@ -429,7 +429,7 @@ export default function ScratchManagement() {
                         </td>
                         <td className="px-4 py-3 text-gray-300 text-sm">{project.author}</td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 bg-primary-500/10 text-primary-400 text-xs rounded-full">
+                          <span className="px-2 py-0.5 bg-gray-700/50 text-gray-300 text-xs rounded-full">
                             {project.category}
                           </span>
                         </td>
@@ -437,7 +437,7 @@ export default function ScratchManagement() {
                           {(() => {
                             const g = groups.find(g => g.id === project.groupId);
                             return g ? (
-                              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs rounded-full">
+                              <span className="px-2 py-0.5 bg-gray-700/50 text-gray-300 text-xs rounded-full">
                                 {g.name}
                               </span>
                             ) : <span className="text-gray-600 text-xs">-</span>;
@@ -463,8 +463,8 @@ export default function ScratchManagement() {
                               onClick={() => toggleFeatured(project)}
                               className={`p-1.5 rounded transition-colors ${
                                 project.isFeatured
-                                  ? 'text-yellow-400 hover:bg-yellow-500/10'
-                                  : 'text-gray-500 hover:text-yellow-400 hover:bg-yellow-500/10'
+                                  ? 'text-gray-400 hover:bg-gray-700/50'
+                                  : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'
                               }`}
                               title={project.isFeatured ? '取消精选' : '设为精选'}
                             >
@@ -472,21 +472,21 @@ export default function ScratchManagement() {
                             </button>
                             <button
                               onClick={() => window.open(`/scratch/${project.id}`, '_blank')}
-                              className="p-1.5 rounded text-gray-500 hover:text-primary-400 hover:bg-primary-500/10 transition-colors"
+                              className="p-1.5 rounded text-gray-500 hover:text-white hover:bg-gray-700/50 transition-colors"
                               title="预览"
                             >
                               <Eye size={16} />
                             </button>
                             <button
                               onClick={() => openEditModal(project)}
-                              className="p-1.5 rounded text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                              className="p-1.5 rounded text-gray-500 hover:text-white hover:bg-gray-700/50 transition-colors"
                               title="编辑"
                             >
                               <Edit size={16} />
                             </button>
                             <button
                               onClick={() => setDeleteId(project.id)}
-                              className="p-1.5 rounded text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                              className="p-1.5 rounded text-gray-500 hover:text-gray-300 hover:bg-gray-700/50 transition-colors"
                               title="删除"
                             >
                               <Trash2 size={16} />
@@ -539,7 +539,7 @@ export default function ScratchManagement() {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="请输入作品名称"
-                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500/50"
+                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
                 />
               </div>
 
@@ -552,7 +552,7 @@ export default function ScratchManagement() {
                     value={formData.author}
                     onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                     placeholder="请输入作者名称"
-                    className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500/50"
+                    className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
                   />
                 </div>
                 <div>
@@ -560,7 +560,7 @@ export default function ScratchManagement() {
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:border-primary-500/50"
+                    className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:border-gray-500"
                   >
                     {categories.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -577,7 +577,7 @@ export default function ScratchManagement() {
                 <select
                   value={formData.groupId}
                   onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:border-primary-500/50"
+                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:border-gray-500"
                 >
                   <option value="">请选择教学小组</option>
                   {groups.map((group) => (
@@ -591,7 +591,7 @@ export default function ScratchManagement() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Scratch 项目文件 * <span className="text-gray-500 text-xs">(.sb3 / .sb2 / .json)</span>
                 </label>
-                <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-primary-500/50 transition-colors">
+                <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
                   <input
                     type="file"
                     id="project-file"
@@ -601,7 +601,7 @@ export default function ScratchManagement() {
                   />
                   {formData.projectFile ? (
                     <div>
-                      <div className="flex items-center justify-center gap-2 text-emerald-400 mb-2">
+                      <div className="flex items-center justify-center gap-2 text-gray-300 mb-2">
                         <Play size={20} />
                         <span className="font-medium">文件已上传</span>
                       </div>
@@ -610,7 +610,7 @@ export default function ScratchManagement() {
                       </p>
                       <button
                         onClick={() => document.getElementById('project-file')?.click()}
-                        className="mt-3 text-sm text-primary-400 hover:text-primary-300"
+                        className="mt-3 text-sm text-gray-400 hover:text-gray-300"
                       >
                         重新上传
                       </button>
@@ -632,7 +632,7 @@ export default function ScratchManagement() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   封面图 <span className="text-gray-500 text-xs">(可选，建议 480x360)</span>
                 </label>
-                <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center hover:border-primary-500/50 transition-colors">
+                <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center hover:border-gray-500 transition-colors">
                   <input
                     type="file"
                     id="cover-file"
@@ -648,10 +648,10 @@ export default function ScratchManagement() {
                         className="w-24 h-18 object-cover rounded"
                       />
                       <div className="text-left">
-                        <p className="text-emerald-400 text-sm font-medium">封面已上传</p>
+                        <p className="text-gray-300 text-sm font-medium">封面已上传</p>
                         <button
                           onClick={() => document.getElementById('cover-file')?.click()}
-                          className="mt-1 text-sm text-primary-400 hover:text-primary-300"
+                          className="mt-1 text-sm text-gray-400 hover:text-gray-300"
                         >
                           重新上传
                         </button>
@@ -678,7 +678,7 @@ export default function ScratchManagement() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="简单介绍一下这个作品..."
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500/50 resize-none"
+                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 resize-none"
                 />
               </div>
 
@@ -690,7 +690,7 @@ export default function ScratchManagement() {
                   onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
                   placeholder="例如：方向键移动、空格键跳跃..."
                   rows={2}
-                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500/50 resize-none"
+                  className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 resize-none"
                 />
               </div>
 
@@ -701,7 +701,7 @@ export default function ScratchManagement() {
                   id="featured-check"
                   checked={formData.isFeatured}
                   onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-primary-500 focus:ring-primary-500/20"
+                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-gray-900 focus:ring-gray-500"
                 />
                 <label htmlFor="featured-check" className="text-sm text-gray-300 cursor-pointer">
                   设为精选作品（首页推荐展示）
@@ -719,7 +719,7 @@ export default function ScratchManagement() {
               <button
                 onClick={handleSubmit}
                 disabled={uploading || coverUploading}
-                className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all text-sm font-medium disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
               >
                 <Save size={16} />
                 保存

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, ChevronLeft, ChevronRight, Play, Pause, Calendar, User, Tag, X, Code, Users, TrendingUp, CheckCircle, Maximize2, Minimize2, Sparkles, Star, Zap, Cpu, Radio } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Play, Pause, Calendar, User, Tag, X, Users, CheckCircle, Maximize2, Minimize2, Clock, Grid3X3 } from 'lucide-react';
 import { photoAPI, categoryAPI } from '../services/api.js';
 
 export default function DashboardShowcase() {
@@ -12,19 +12,6 @@ export default function DashboardShowcase() {
     approvalRate: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-
-  const getCategoryPlaceholder = (category) => {
-    const placeholders = {
-      '机器人编程': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=futuristic%20robot%20cyberpunk%20neon%20coding%20interface%20sci-fi&image_size=landscape_16_9',
-      '动画制作': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=neon%20animation%20timeline%20futuristic%20motion%20graphics%20sci-fi&image_size=landscape_16_9',
-      '项目开发': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=holographic%20code%20interface%20futuristic%20programming%20sci-fi&image_size=landscape_16_9',
-      '游戏创作': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cyberpunk%20game%20interface%20neon%20pixel%20futuristic&image_size=landscape_16_9',
-      '人工智能': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=futuristic%20AI%20neural%20network%20holographic%20sci-fi%20neon&image_size=landscape_16_9',
-      '网页设计': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=futuristic%20web%20design%20holographic%20UI%20neon%20sci-fi&image_size=landscape_16_9',
-      '创意绘画': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=digital%20art%20neon%20creative%20holographic%20canvas%20sci-fi&image_size=landscape_16_9'
-    };
-    return placeholders[category] || 'https://neeko-copilot.bytedance.net/api/text2image?prompt=futuristic%20coding%20education%20neon%20interface%20sci-fi&image_size=landscape_16_9';
-  };
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,11 +27,12 @@ export default function DashboardShowcase() {
   const containerRef = useRef(null);
   const thumbStripRef = useRef(null);
   const AUTO_PLAY_INTERVAL = 6000;
+  const [slideDirection, setSlideDirection] = useState('down');
+  const [previousIndex, setPreviousIndex] = useState(0);
 
   useEffect(() => {
     loadData();
     loadStats();
-    // 动态加载作品类型列表
     categoryAPI.getList('photo').then((res) => {
       if (res?.data && Array.isArray(res.data)) {
         setCategories([
@@ -72,11 +60,9 @@ export default function DashboardShowcase() {
 
   useEffect(() => {
     let filtered = photos;
-
     if (activeCategory !== 'all') {
       filtered = filtered.filter(p => p.category === activeCategory);
     }
-
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(p =>
@@ -85,22 +71,20 @@ export default function DashboardShowcase() {
         (p.authorName || '').toLowerCase().includes(term)
       );
     }
-
     setFilteredPhotos(filtered);
     setCurrentIndex(0);
+    setPreviousIndex(0);
   }, [photos, activeCategory, searchTerm]);
 
   useEffect(() => {
     if (isAutoPlay && filteredPhotos.length > 1) {
       setProgress(0);
       const startTime = Date.now();
-      
       progressRef.current = setInterval(() => {
         const elapsed = Date.now() - startTime;
         const newProgress = Math.min((elapsed / AUTO_PLAY_INTERVAL) * 100, 100);
         setProgress(newProgress);
       }, 50);
-
       autoPlayRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % filteredPhotos.length);
       }, AUTO_PLAY_INTERVAL);
@@ -155,12 +139,16 @@ export default function DashboardShowcase() {
   };
 
   const handlePrev = useCallback(() => {
+    setPreviousIndex(currentIndex);
+    setSlideDirection('up');
     setCurrentIndex((prev) => (prev - 1 + filteredPhotos.length) % filteredPhotos.length);
-  }, [filteredPhotos.length]);
+  }, [filteredPhotos.length, currentIndex]);
 
   const handleNext = useCallback(() => {
+    setPreviousIndex(currentIndex);
+    setSlideDirection('down');
     setCurrentIndex((prev) => (prev + 1) % filteredPhotos.length);
-  }, [filteredPhotos.length]);
+  }, [filteredPhotos.length, currentIndex]);
 
   const toggleAutoPlay = () => {
     setIsAutoPlay(!isAutoPlay);
@@ -197,8 +185,8 @@ export default function DashboardShowcase() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowLeft') handlePrev();
-      else if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowUp') handlePrev();
+      else if (e.key === 'ArrowDown') handleNext();
       else if (e.key === ' ') { e.preventDefault(); toggleAutoPlay(); }
       else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
     };
@@ -209,100 +197,60 @@ export default function DashboardShowcase() {
   const currentPhoto = filteredPhotos[currentIndex];
 
   const statCards = [
-    { label: '作品总数', value: stats.total, icon: Cpu, color: 'cyan' },
-    { label: '学员人数', value: stats.students, icon: Users, color: 'purple' },
-    { label: '本月新增', value: stats.monthlyNew, icon: Zap, color: 'amber' },
-    { label: '通过率', value: `${stats.approvalRate}%`, icon: CheckCircle, color: 'emerald' }
+    { label: '作品总数', value: stats.total, icon: Grid3X3 },
+    { label: '学员人数', value: stats.students, icon: Users },
+    { label: '本月新增', value: stats.monthlyNew, icon: Calendar },
+    { label: '通过率', value: `${stats.approvalRate}%`, icon: CheckCircle }
   ];
-
-  const colorMap = {
-    cyan: { border: 'border-cyan-500/50', bg: 'bg-cyan-500/10', text: 'text-cyan-400', glow: 'shadow-cyan-500/30', gradient: 'from-cyan-500 to-blue-500' },
-    purple: { border: 'border-purple-500/50', bg: 'bg-purple-500/10', text: 'text-purple-400', glow: 'shadow-purple-500/30', gradient: 'from-purple-500 to-pink-500' },
-    amber: { border: 'border-amber-500/50', bg: 'bg-amber-500/10', text: 'text-amber-400', glow: 'shadow-amber-500/30', gradient: 'from-amber-500 to-orange-500' },
-    emerald: { border: 'border-emerald-500/50', bg: 'bg-emerald-500/10', text: 'text-emerald-400', glow: 'shadow-emerald-500/30', gradient: 'from-emerald-500 to-teal-500' }
-  };
-
-  const categoryGradients = {
-    '机器人编程': 'from-cyan-500 to-blue-500',
-    '动画制作': 'from-pink-500 to-purple-500',
-    '项目开发': 'from-violet-500 to-indigo-500',
-    '游戏创作': 'from-amber-500 to-red-500',
-    '人工智能': 'from-emerald-500 to-cyan-500',
-    '网页设计': 'from-blue-500 to-cyan-500',
-    '创意绘画': 'from-rose-500 to-pink-500'
-  };
 
   return (
     <div
       ref={containerRef}
-      className="h-screen flex flex-col text-white overflow-hidden relative"
-      style={{
-        background: 'linear-gradient(135deg, #050a14 0%, #0a1020 50%, #070d18 100%)'
-      }}
+      className="h-screen flex flex-col text-gray-100 overflow-hidden relative"
+      style={{ background: '#0f0f0f' }}
     >
-      {/* 科技网格背景 */}
+      {/* 微噪点质感背景 */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-30"
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
-          backgroundImage: `
-            linear-gradient(rgba(6, 182, 212, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(6, 182, 212, 0.08) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px'
+          backgroundImage: `radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)`,
+          backgroundSize: '24px 24px'
         }}
       />
 
-      {/* 扫描线效果 */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-10"
-        style={{
-          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(6, 182, 212, 0.05) 2px, rgba(6, 182, 212, 0.05) 4px)'
-        }}
-      />
-
-      {/* 发光光晕 */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <header className="flex-shrink-0 px-8 py-4 border-b border-cyan-500/30 bg-gray-950/80 backdrop-blur-md relative z-10">
+      {/* 顶部导航 */}
+      <header className="flex-shrink-0 px-8 py-4 border-b border-gray-800 bg-[#0f0f0f]/90 backdrop-blur-sm relative z-10">
         <div className="flex items-center justify-between gap-6">
-          <div className="flex items-center space-x-4 flex-shrink-0">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center shadow-lg shadow-cyan-500/40 animate-pulseSlow border border-cyan-400/50">
-                <Radio size={24} className="text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-400 border-2 border-gray-950 animate-pulse shadow-lg shadow-cyan-400/50" />
+          <div className="flex items-center space-x-3 flex-shrink-0">
+            <div className="w-10 h-10 rounded-md bg-white flex items-center justify-center">
+              <Grid3X3 size={18} className="text-gray-900" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-wider" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                <span className="text-cyan-400">CODE</span>
-                <span className="text-purple-400">KIDS</span>
-                <span className="text-white ml-2">作品展示墙</span>
+              <h1 className="text-lg font-semibold tracking-wide leading-tight text-white">
+                造物课堂 · 作品展示
               </h1>
-              <p className="text-xs text-cyan-300/70 mt-0.5" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                SYSTEM ONLINE // CREATIVE VISUALIZATION MODULE
+              <p className="text-xs text-gray-500 leading-tight">
+                STUDENT SHOWCASE
               </p>
             </div>
           </div>
 
-          <div className="flex-1 max-w-lg">
-            <div className="relative group">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400/60" />
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="搜索作品名称或作者..."
-                className="w-full bg-gray-900/60 border border-cyan-500/30 rounded-lg py-2.5 pl-11 pr-10 text-white placeholder-cyan-300/30 focus:outline-none focus:border-cyan-400 focus:bg-gray-900/80 focus:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all text-sm"
-                style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                className="w-full bg-gray-900 border border-gray-800 rounded-md py-2 pl-9 pr-9 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-gray-600 focus:bg-gray-900 transition-all"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               {searchTerm && (
                 <button
                   onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-300/50 hover:text-cyan-400 transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               )}
             </div>
@@ -310,229 +258,259 @@ export default function DashboardShowcase() {
 
           <div className="flex items-center space-x-4 flex-shrink-0">
             <div className="text-right">
-              <p className="text-base font-mono text-cyan-400 glow-number">{formatTime(currentTime)}</p>
-              <div className="flex items-center space-x-2 justify-end mt-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50" />
-                <span className="text-xs text-cyan-300/50" style={{ fontFamily: 'JetBrains Mono, monospace' }}>ONLINE</span>
+              <p className="text-sm font-mono text-gray-300 leading-tight">{formatTime(currentTime)}</p>
+              <div className="flex items-center space-x-1.5 justify-end mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                <span className="text-xs text-gray-500">LIVE</span>
               </div>
             </div>
             <button
               onClick={toggleFullscreen}
               title={isFullscreen ? '退出全屏 (F)' : '全屏显示 (F)'}
-              className="w-10 h-10 rounded-lg bg-gray-900/60 border border-cyan-500/30 flex items-center justify-center hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all group"
+              className="w-9 h-9 rounded-md bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-gray-800 hover:border-gray-700 transition-all"
             >
-              {isFullscreen ? <Minimize2 size={18} className="text-cyan-400" /> : <Maximize2 size={18} className="text-cyan-400" />}
+              {isFullscreen ? <Minimize2 size={16} className="text-gray-400" /> : <Maximize2 size={16} className="text-gray-400" />}
             </button>
           </div>
         </div>
       </header>
 
-      <section className="flex-shrink-0 px-8 py-4 relative z-10">
-        <div className="grid grid-cols-4 gap-4">
+      {/* 主体 */}
+      <section className="flex-1 min-h-0 px-8 py-4 relative z-10 flex gap-6">
+        {/* 左侧：统计卡片 */}
+        <div className="w-52 flex-shrink-0 flex flex-col gap-3">
+          <div className="text-xs font-medium text-gray-500 uppercase tracking-wider px-1 mb-1">
+            数据概览
+          </div>
           {statCards.map((stat, idx) => {
             const Icon = stat.icon;
-            const colors = colorMap[stat.color];
             return (
               <div
                 key={idx}
-                className={`relative ${colors.bg} ${colors.border} border rounded-lg p-4 overflow-hidden group hover:scale-[1.02] transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]`}
+                className="bg-gray-900/60 border border-gray-800 rounded-md p-4 group hover:border-gray-700 transition-colors"
               >
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
-                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-                <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${colors.gradient} opacity-10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:opacity-25 transition-opacity`} />
-                <div className="flex items-center justify-between relative">
-                  <div>
-                    <p className="text-xs text-cyan-300/60 mb-1.5" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{stat.label.toUpperCase()}</p>
-                    <p className={`text-2xl font-bold ${colors.text} font-mono glow-number`}>
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <p className="text-xs text-gray-500 mb-1">{stat.label}</p>
+                    <p className="text-2xl font-semibold text-white font-mono">
                       {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                     </p>
                   </div>
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colors.gradient} flex items-center justify-center shadow-lg ${colors.glow}`}>
-                    <Icon size={18} className="text-white" />
+                  <div className="w-10 h-10 rounded-md bg-gray-800 flex items-center justify-center">
+                    <Icon size={18} className="text-gray-400" />
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
-      </section>
 
-      <section className="flex-shrink-0 px-8 py-3 relative z-10">
-        <div className="flex items-center space-x-3 overflow-x-auto pb-1">
-          <div className="flex items-center space-x-2 flex-shrink-0 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
-            <Tag size={16} className="text-cyan-400" />
-            <span className="text-sm text-cyan-300" style={{ fontFamily: 'JetBrains Mono, monospace' }}>FILTER</span>
-          </div>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-5 py-2 rounded-lg text-sm whitespace-nowrap transition-all duration-300 flex-shrink-0 border ${
-                activeCategory === cat.id
-                  ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)] scale-105'
-                  : 'bg-gray-900/60 text-cyan-300/70 border-cyan-500/20 hover:border-cyan-400/60 hover:text-cyan-300 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-              }`}
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
-            >
-              {activeCategory === cat.id ? `> ${cat.name} <` : cat.name}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="flex-1 min-h-0 px-8 py-4 relative z-10">
+        {/* 中间：大图展示 */}
+        <div className="flex-1 min-w-0 flex flex-col">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex-1 flex items-center justify-center min-h-0">
             <div className="text-center">
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full border-2 border-cyan-500/30 border-t-cyan-400 animate-spin flex items-center justify-center">
-                  <Cpu size={36} className="text-cyan-400" />
-                </div>
-                <div className="absolute inset-0 rounded-full border border-cyan-500/20 animate-ping" />
-              </div>
-              <p className="text-cyan-400 mt-6 text-lg" style={{ fontFamily: 'JetBrains Mono, monospace' }}>LOADING DATA...</p>
+              <div className="w-16 h-16 rounded-full border-2 border-gray-700 border-t-gray-400 animate-spin mx-auto" />
+              <p className="text-gray-500 mt-6 text-sm">加载中...</p>
             </div>
           </div>
         ) : filteredPhotos.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex-1 flex items-center justify-center min-h-0">
             <div className="text-center">
-              <div className="text-8xl mb-6 opacity-60">🌌</div>
-              <p className="text-xl text-cyan-200 mb-2">未检测到符合条件的数据</p>
-              <p className="text-sm text-cyan-300/50" style={{ fontFamily: 'JetBrains Mono, monospace' }}>请调整搜索参数或作品类型筛选</p>
+              <p className="text-gray-400 text-lg mb-2">暂无作品</p>
+              <p className="text-sm text-gray-600">请调整搜索条件</p>
             </div>
           </div>
         ) : (
-          <div className="relative h-full flex flex-col">
-            <div className="flex-1 min-h-0 flex items-center justify-center relative">
-              <div className="relative w-full h-full max-w-5xl rounded-xl overflow-hidden bg-gray-950/60 border border-cyan-500/30 shadow-[0_0_60px_rgba(6,182,212,0.15)]">
-                {/* 边角装饰 */}
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-cyan-400 rounded-tl-lg z-20" />
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-cyan-400 rounded-tr-lg z-20" />
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-cyan-400 rounded-bl-lg z-20" />
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-cyan-400 rounded-br-lg z-20" />
+          <div className="relative w-full flex-1 min-h-0 flex flex-col">
+            <div className="w-full flex-1 min-h-0 flex items-center justify-center relative overflow-hidden">
+              <style>{`
+                @keyframes vs-enter-from-bottom { from { transform: translateY(100%);  } to { transform: translateY(0);     } }
+                @keyframes vs-leave-to-top      { from { transform: translateY(0);      } to { transform: translateY(-100%); } }
+                @keyframes vs-enter-from-top    { from { transform: translateY(-100%); } to { transform: translateY(0);     } }
+                @keyframes vs-leave-to-bottom   { from { transform: translateY(0);      } to { transform: translateY(100%);  } }
+                .vs-anim {
+                  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+                  animation-duration: 520ms;
+                  animation-fill-mode: both;
+                  will-change: transform;
+                }
+              `}</style>
+              <div
+                className="relative flex items-center justify-center overflow-hidden rounded-lg"
+                style={{
+                  height: 'clamp(380px, 72svh, 720px)',
+                  width:  'clamp(285px, 72svh * 0.75, 540px)',
+                }}
+              >
+                {(() => {
+                  const n = filteredPhotos.length;
+                  const currPhoto = filteredPhotos[currentIndex];
+                  const prevPhoto = filteredPhotos[previousIndex];
+                  const sameSlide = currentIndex === previousIndex;
 
-                <img
-                  src={currentPhoto?.imageUrl}
-                  alt={currentPhoto?.title}
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    e.target.src = getCategoryPlaceholder(currentPhoto?.category);
-                  }}
-                />
+                  const renderSlideContent = (p, idx, isCurrent) => (
+                    <div className="relative w-full h-full overflow-hidden rounded-lg bg-gray-900 border border-gray-700">
+                      <img
+                        src={p.imageUrl}
+                        alt={p.title}
+                        className="relative z-10 w-full h-full object-cover"
+                      />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
+                      {isCurrent && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
+                      )}
+                      {!isCurrent && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
+                      )}
 
-                <div className="absolute bottom-0 left-0 right-0 p-8">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: 'JetBrains Mono, monospace', textShadow: '0 0 20px rgba(6,182,212,0.5)' }}>
-                        {currentPhoto?.title}
-                      </h2>
-                      <div className="flex items-center space-x-5 text-cyan-100/80 flex-wrap gap-y-2" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                        <div className="flex items-center space-x-2">
-                          <User size={18} className="text-cyan-400" />
-                          <span className="text-base">{currentPhoto?.authorName || currentPhoto?.author}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Tag size={18} className="text-purple-400" />
-                          <span className="text-base">{currentPhoto?.category}</span>
-                        </div>
-                        {currentPhoto?.createdAt && (
-                          <div className="flex items-center space-x-2">
-                            <Calendar size={18} className="text-emerald-400" />
-                            <span className="text-base">{formatDate(currentPhoto.createdAt)}</span>
+                      {isCurrent && (
+                        <>
+                          <div className="absolute bottom-0 left-0 right-0 p-5 z-20">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <h2 className="text-xl font-semibold text-white mb-2 truncate">
+                                  {p.title}
+                                </h2>
+                                <div className="flex items-center space-x-4 text-gray-300 text-sm flex-wrap gap-y-1.5">
+                                  <div className="flex items-center space-x-1.5">
+                                    <User size={14} className="text-gray-400" />
+                                    <span>{p.authorName || p.author}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1.5">
+                                    <Tag size={14} className="text-gray-400" />
+                                    <span>{p.category}</span>
+                                  </div>
+                                  {p.createdAt && (
+                                    <div className="flex items-center space-x-1.5">
+                                      <Calendar size={14} className="text-gray-400" />
+                                      <span>{formatDate(p.createdAt)}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex-shrink-0">
+                                <div className="px-3 py-1 rounded bg-white/10 backdrop-blur-sm text-white text-xs border border-white/20">
+                                  {p.category}
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <div className={`px-4 py-2 rounded-lg bg-gradient-to-r ${categoryGradients[currentPhoto?.category] || 'from-gray-500 to-gray-600'} text-white text-sm font-medium shadow-lg border border-white/20`}>
-                        {currentPhoto?.category}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="absolute top-6 left-6 px-4 py-2 rounded-lg bg-black/60 backdrop-blur-sm border border-cyan-500/30 text-cyan-400 text-sm font-mono flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50" />
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{String(currentIndex + 1).padStart(2, '0')} / {String(filteredPhotos.length).padStart(2, '0')}</span>
-                </div>
+                          <div className="absolute top-4 left-4 px-2.5 py-1 rounded bg-black/50 backdrop-blur-sm text-gray-300 text-xs font-mono flex items-center space-x-2 z-20">
+                            <span>{String(idx + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}</span>
+                          </div>
+                        </>
+                      )}
 
-                <div className="absolute top-6 right-6 flex items-center space-x-2">
-                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-purple-500/30">
-                    <Star size={16} className="text-purple-400 fill-purple-400" />
-                    <span className="text-sm text-cyan-100" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{currentPhoto?.likeCount || 0}</span>
-                  </div>
-                </div>
+                      {!isCurrent && (
+                        <div className="absolute bottom-0 left-0 right-0 p-3 z-20">
+                          <h3 className="text-base font-medium text-white mb-0.5 truncate">
+                            {p.title}
+                          </h3>
+                          <p className="text-xs text-gray-400 truncate">
+                            {p.authorName || p.author}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+
+                  if (sameSlide || n <= 1) {
+                    return (
+                      <div className="absolute inset-0 z-20 rounded-lg shadow-2xl ring-1 ring-white/10">
+                        {renderSlideContent(currPhoto, currentIndex, true)}
+                      </div>
+                    );
+                  }
+
+                  const enterAnim = slideDirection === 'down' ? 'vs-enter-from-bottom' : 'vs-enter-from-top';
+                  const leaveAnim = slideDirection === 'down' ? 'vs-leave-to-top'      : 'vs-leave-to-bottom';
+
+                  return (
+                    <>
+                      <div
+                        key={`leave-${previousIndex}-${slideDirection}`}
+                        className="absolute inset-0 z-10 vs-anim"
+                        style={{ animationName: leaveAnim }}
+                      >
+                        {renderSlideContent(prevPhoto, previousIndex, false)}
+                      </div>
+                      <div
+                        key={`curr-${currentIndex}-${slideDirection}`}
+                        className="absolute inset-0 z-20 vs-anim rounded-lg shadow-2xl ring-1 ring-white/10"
+                        style={{ animationName: enterAnim }}
+                      >
+                        {renderSlideContent(currPhoto, currentIndex, true)}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
+              {/* 上下翻页按钮 */}
               <button
                 onClick={handlePrev}
-                title="上一张 (←)"
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg bg-gray-950/80 border border-cyan-500/40 flex items-center justify-center hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all group z-10 backdrop-blur-sm"
+                title="上一张 (↑)"
+                className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-10 rounded-md bg-black/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center hover:bg-gray-800/70 hover:border-gray-600 transition-all group z-30"
               >
-                <ChevronLeft size={28} className="text-cyan-400 group-hover:text-white" />
+                <ChevronLeft size={22} className="text-gray-400 group-hover:text-white rotate-90" />
               </button>
               <button
                 onClick={handleNext}
-                title="下一张 (→)"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg bg-gray-950/80 border border-cyan-500/40 flex items-center justify-center hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all group z-10 backdrop-blur-sm"
+                title="下一张 (↓)"
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 w-10 h-10 rounded-md bg-black/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center hover:bg-gray-800/70 hover:border-gray-600 transition-all group z-30"
               >
-                <ChevronRight size={28} className="text-cyan-400 group-hover:text-white" />
+                <ChevronRight size={22} className="text-gray-400 group-hover:text-white rotate-90" />
               </button>
             </div>
 
+            {/* 底部控制栏 */}
             <div className="flex-shrink-0 mt-4 flex items-center gap-4">
               <div className="flex items-center space-x-3 flex-shrink-0">
                 <button
                   onClick={toggleAutoPlay}
                   title="暂停/播放 (空格)"
-                  className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all border ${
+                  className={`w-10 h-10 rounded-md flex items-center justify-center transition-all border ${
                     isAutoPlay
-                      ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                      : 'bg-gray-900/60 border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400'
+                      ? 'bg-white text-gray-900 border-white'
+                      : 'bg-gray-900 border-gray-800 text-gray-500 hover:bg-gray-800 hover:border-gray-700'
                   }`}
                 >
-                  {isAutoPlay ? (
-                    <Pause size={20} className="text-cyan-400" />
-                  ) : (
-                    <Play size={20} className="text-cyan-400" />
-                  )}
+                  {isAutoPlay ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
                 </button>
-                <div className="text-sm text-cyan-300/70" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                  {isAutoPlay ? 'AUTOPLAY // ON' : 'AUTOPLAY // OFF'}
+                <div className="text-xs text-gray-500">
+                  {isAutoPlay ? '自动播放中' : '已暂停'}
                 </div>
               </div>
 
-              {/* 自动播放进度条 */}
-              <div className="flex-1 h-2 bg-gray-800/60 rounded-full overflow-hidden border border-cyan-500/20">
+              {/* 进度条 */}
+              <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                  className="h-full bg-gray-400 transition-all duration-100 ease-linear"
                   style={{ width: `${progress}%` }}
                 />
               </div>
 
+              {/* 缩略图 */}
               <div
                 ref={thumbStripRef}
-                className="flex-1 flex items-center gap-3 overflow-x-auto scroll-smooth py-2 hide-scrollbar"
+                className="flex-1 flex items-center gap-2 overflow-x-auto scroll-smooth py-1 hide-scrollbar"
               >
                 {filteredPhotos.map((photo, idx) => (
                   <button
                     key={photo._id || idx}
                     onClick={() => setCurrentIndex(idx)}
-                    className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                    className={`flex-shrink-0 w-16 h-11 rounded overflow-hidden border transition-all duration-300 ${
                       idx === currentIndex
-                        ? 'border-cyan-400 ring-2 ring-cyan-400/40 scale-110 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
-                        : 'border-cyan-500/20 opacity-50 hover:opacity-100 hover:border-cyan-400/60'
+                        ? 'border-white ring-2 ring-white/30 scale-105'
+                        : 'border-gray-800 opacity-50 hover:opacity-100 hover:border-gray-600'
                     }`}
                   >
                     <img
                       src={photo.imageUrl}
                       alt={photo.title}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = getCategoryPlaceholder(photo.category);
-                      }}
                     />
                   </button>
                 ))}
@@ -541,26 +519,50 @@ export default function DashboardShowcase() {
               <button
                 onClick={toggleFullscreen}
                 title={isFullscreen ? '退出全屏 (F)' : '全屏显示 (F)'}
-                className="flex-shrink-0 w-12 h-12 rounded-lg bg-gray-900/60 border border-cyan-500/30 flex items-center justify-center hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all"
+                className="flex-shrink-0 w-10 h-10 rounded-md bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-gray-800 hover:border-gray-700 transition-all"
               >
-                {isFullscreen ? <Minimize2 size={20} className="text-cyan-400" /> : <Maximize2 size={20} className="text-cyan-400" />}
+                {isFullscreen ? <Minimize2 size={16} className="text-gray-400" /> : <Maximize2 size={16} className="text-gray-400" />}
               </button>
             </div>
           </div>
         )}
+        </div>
+
+        {/* 右侧：分类筛选 */}
+        <div className="w-40 flex-shrink-0 flex flex-col gap-2">
+          <div className="text-xs font-medium text-gray-500 uppercase tracking-wider px-1 mb-1">
+            分类
+          </div>
+          {categories.map((cat) => {
+            const count = cat.id === 'all'
+              ? filteredPhotos.length
+              : filteredPhotos.filter(p => p.category === cat.name).length;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-md text-sm transition-all border flex items-center justify-between gap-2 ${
+                  activeCategory === cat.id
+                    ? 'bg-white text-gray-900 border-white font-medium'
+                    : 'bg-gray-900/60 text-gray-400 border-gray-800 hover:border-gray-700 hover:text-gray-300 hover:bg-gray-900'
+                }`}
+              >
+                <span className="truncate">{cat.name}</span>
+                <span className={`text-xs ${activeCategory === cat.id ? 'text-gray-500' : 'text-gray-600'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </section>
 
-      <footer className="flex-shrink-0 px-8 py-3 border-t border-cyan-500/20 bg-gray-950/60 backdrop-blur-sm relative z-10">
-        <div className="flex items-center justify-center space-x-8">
-          <div className="flex items-center space-x-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50" />
-            <span className="text-cyan-300/80 text-sm" style={{ fontFamily: 'JetBrains Mono, monospace' }}>CREATIVE VISUALIZATION ACTIVE</span>
-          </div>
-          <div className="h-4 w-px bg-cyan-500/30" />
-          <div className="flex items-center space-x-2">
-            <Sparkles size={16} className="text-purple-400" />
-            <span className="text-purple-300/80 text-sm" style={{ fontFamily: 'JetBrains Mono, monospace' }}>INSPIRE · CREATE · FUTURE</span>
-          </div>
+      {/* 底部 */}
+      <footer className="flex-shrink-0 px-8 py-3 border-t border-gray-800 bg-[#0f0f0f]/90 backdrop-blur-sm relative z-10">
+        <div className="flex items-center justify-center space-x-6 text-xs text-gray-600">
+          <span>造物课堂 · 学生作品展示</span>
+          <span className="text-gray-800">|</span>
+          <span>INSPIRE · CREATE · SHARE</span>
         </div>
       </footer>
     </div>

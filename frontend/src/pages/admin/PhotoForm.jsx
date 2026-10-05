@@ -243,7 +243,7 @@ export default function PhotoForm() {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="请输入作品名称"
                 className={`w-full bg-gray-800/60 border rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none transition-colors ${
-                  errors.title ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
+                  errors.title ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'
                 }`}
               />
               {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title}</p>}
@@ -257,7 +257,7 @@ export default function PhotoForm() {
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className={`w-full bg-gray-800/60 border rounded-lg py-3 px-4 text-white focus:outline-none transition-colors ${
-                  errors.category ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
+                  errors.category ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'
                 }`}
               >
                 {categories.map((cat) => (
@@ -274,7 +274,7 @@ export default function PhotoForm() {
               <select
                 value={formData.groupId}
                 onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
-                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-gray-500 transition-colors"
               >
                 <option value="">请选择教学小组</option>
                 {groups.map((group) => (
@@ -291,7 +291,7 @@ export default function PhotoForm() {
                 value={formData.author}
                 onChange={(e) => handleAuthorChange(e.target.value)}
                 className={`w-full bg-gray-800/60 border rounded-lg py-3 px-4 text-white focus:outline-none transition-colors ${
-                  errors.author ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
+                  errors.author ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'
                 }`}
               >
                 <option value="">选择作者</option>
@@ -329,12 +329,12 @@ export default function PhotoForm() {
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 placeholder="请输入图片URL或点击上传"
                 className={`flex-1 min-w-[200px] bg-gray-800/60 border rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none transition-colors ${
-                  errors.imageUrl ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'
+                  errors.imageUrl ? 'border-red-500' : 'border-gray-700 focus:border-gray-500'
                 }`}
               />
               <label
                 className={`flex items-center space-x-2 px-4 py-3 rounded-lg cursor-pointer transition-colors ${
-                  uploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-500'
+                  uploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-gray-700 hover:bg-gray-600'
                 } text-white`}
               >
                 <ImageIcon size={18} />
@@ -381,7 +381,7 @@ export default function PhotoForm() {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="请输入作品描述..."
               rows={4}
-              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 resize-none"
+              className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 resize-none"
             />
           </div>
 
@@ -391,7 +391,7 @@ export default function PhotoForm() {
               id="isFeatured"
               checked={formData.isFeatured}
               onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-              className="w-5 h-5 rounded border-gray-600 bg-gray-700 text-primary-500 focus:ring-primary-500"
+              className="w-5 h-5 rounded border-gray-600 bg-gray-700 text-gray-900 focus:ring-gray-500"
             />
             <label htmlFor="isFeatured" className="text-gray-300">设为精选作品</label>
           </div>
@@ -407,7 +407,7 @@ export default function PhotoForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium rounded-lg transition-all disabled:opacity-50"
+              className="flex-1 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">

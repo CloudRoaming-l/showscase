@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
@@ -14,8 +15,14 @@ import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import groupRoutes from './routes/groupRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
+import lessonStageRoutes from './routes/lessonStageRoutes.js';
+import lessonRoutes from './routes/lessonRoutes.js';
+import toolCategoryRoutes from './routes/toolCategoryRoutes.js';
+import toolRoutes from './routes/toolRoutes.js';
+import attachmentRoutes from './routes/attachmentRoutes.js';
 import { paginationValidator, searchSanitizer } from './middleware/validate.js';
 import { turbowarpProxy } from './middleware/turbowarpProxy.js';
+import { hardwareLogin } from './middleware/hardwareAccess.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -68,6 +75,7 @@ app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: true, limit: '256kb' }));
 
 // —— 全局中间件：分页参数校验 + 搜索参数清洗 ——
+app.use(cookieParser());
 app.use(paginationValidator);
 app.use(searchSanitizer);
 
@@ -89,8 +97,19 @@ app.use('/uploads/scratch-covers', express.static(path.join(__dirname, '../uploa
   etag: true
 }));
 
+// —— 静态文件服务：硬件知识库上传文件 ——
+app.use('/uploads/hardware', express.static(path.join(__dirname, '../uploads/hardware'), {
+  maxAge: '7d',
+  etag: true
+}));
+
 // —— Turbowarp 反向代理（解决 iframe 跨域 + mixed content 加载本地项目文件失败）——
+// /turbowarp/* 代理到 https://turbowarp.org/*，HTML 中注入 <base> 让相对资源走这个路径
+// Webpack 动态 chunk（/js/...）使用绝对路径不受 <base> 影响，所以也需要代理
 app.use('/turbowarp', turbowarpProxy);
+app.use('/js', turbowarpProxy);
+app.use('/css', turbowarpProxy);
+app.use('/static', turbowarpProxy);
 
 // —— 健康检查（公开） ——
 app.get('/api/health', (req, res) => {
@@ -103,6 +122,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// —— 硬件知识库密码登录（公开） ——
+app.post('/api/hardware/login', express.json(), (req, res) => hardwareLogin(req, res));
+
 // —— 路由注册 ——
 app.use('/api/photos', photoRoutes);
 app.use('/api/scratch', scratchRoutes);
@@ -113,6 +135,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/comments', commentRoutes);
+// 硬件知识库路由
+app.use('/api/hardware/stages', lessonStageRoutes);
+app.use('/api/hardware/lessons', lessonRoutes);
+app.use('/api/hardware/tool-categories', toolCategoryRoutes);
+app.use('/api/hardware/tools', toolRoutes);
+app.use('/api/hardware/attachments', attachmentRoutes);
 
 // —— 404 兜底 ——
 app.use('/api', (req, res) => {

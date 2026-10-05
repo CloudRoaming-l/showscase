@@ -3,21 +3,18 @@
  * 作用：
  * 1. 将 /turbowarp/* 路径代理到 https://turbowarp.org/*
  * 2. 重写 embed.html 中的相对资源路径，确保 iframe 同源加载，避免 mixed content
- * 3. 这样 iframe 加载 http://localhost:5001/turbowarp/embed.html 时：
- *    - 同源 HTTP，不会被 mixed content 阻止
- *    - project_url 指向 http://localhost:5001/uploads/... 也同源
- *    - 解决 iframe 跨域 + mixed content 加载本地项目文件失败的问题
+ * 3. 给静态资源加浏览器端强缓存，减少重复下载，解决预览卡顿
+ * 4. 静态资源保留上游 gzip/br 压缩，节省带宽加快加载
  */
 import https from 'https';
 
 const TURBOWARP_HOST = 'turbowarp.org';
 const PROXY_PATH = '/turbowarp';
 
-// 过滤的响应头（避免跨域/CORS/编码问题）
+// 过滤的响应头（不保留 upstream 的敏感头/安全头）
 const PASSTHROUGH_HEADERS = [
   'content-type',
   'content-length',
-  'cache-control',
   'etag',
   'last-modified',
   'accept-ranges',
@@ -25,7 +22,43 @@ const PASSTHROUGH_HEADERS = [
   'content-encoding'
 ];
 
+// 根据 upstreamPath 获取对应的缓存策略
+function getCacheControl(upstreamPath) {
+  const clean = upstreamPath.split('?')[0];
+
+  // 页面入口：不做强缓存，只做协商缓存（避免 URL 参数变化不生效）
+  if (/\/(embed|editor)\.html$/i.test(clean) || clean === '/' || clean === '') {
+    return 'no-cache';
+  }
+
+  // Turbowarp 版本化静态资源（带 hash 文件名），可永久缓存
+  if (
+    clean.startsWith('/static/') ||
+    clean.startsWith('/js/') ||
+    clean.startsWith('/css/')
+  ) {
+    return 'public, max-age=604800, immutable';
+  }
+
+  // 其他资源（字体、图片等）：5 分钟短缓存做缓冲
+  return 'public, max-age=300';
+}
+
+// 判断该请求是否需要重写响应体（HTML/CSS 需要解压缩）
+function needsRewrite(upstreamPath) {
+  const clean = upstreamPath.split('?')[0];
+  return (
+    /\.html$/i.test(clean) ||
+    /\.css$/i.test(clean) ||
+    /\/editor(\/?)$/i.test(clean) ||
+    clean === '/' ||
+    clean === ''
+  );
+}
+
 function fetchUpstream(req, res, upstreamPath) {
+  const needRewrite = needsRewrite(upstreamPath);
+
   const options = {
     hostname: TURBOWARP_HOST,
     port: 443,
@@ -34,28 +67,40 @@ function fetchUpstream(req, res, upstreamPath) {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       'Accept': req.headers.accept || '*/*',
-      'Accept-Language': req.headers['accept-language'] || 'en-US,en;q=0.9',
-      'Accept-Encoding': 'identity' // 避免压缩，方便重写 HTML
+      'Accept-Language': req.headers['accept-language'] || 'en-US,en;q=0.9'
     }
   };
+
+  // 只有需要重写 HTML/CSS 响应体时才强制 identity，其他资源保留上游压缩
+  if (needRewrite) {
+    options.headers['Accept-Encoding'] = 'identity';
+  } else if (req.headers['accept-encoding']) {
+    options.headers['Accept-Encoding'] = req.headers['accept-encoding'];
+  }
+
+  const cacheControl = getCacheControl(upstreamPath);
 
   const proxyReq = https.request(options, (proxyRes) => {
     const status = proxyRes.statusCode || 502;
     res.status(status);
 
-    // 透传响应头
+    // 透传白名单响应头
     PASSTHROUGH_HEADERS.forEach((h) => {
       if (proxyRes.headers[h] !== undefined) {
         res.setHeader(h, proxyRes.headers[h]);
       }
     });
 
+    // 覆盖缓存策略（基于路径）
+    res.setHeader('Cache-Control', cacheControl);
+
     // 移除跨域限制（让父页面可以接收 iframe 事件）
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
 
     const contentType = proxyRes.headers['content-type'] || '';
 
-    // 对于 HTML 响应，重写相对路径
+    // 对于 HTML 响应，重写相对路径（加 <base> 保证相对资源正确加载）
     if (contentType.includes('text/html')) {
       let body = '';
       proxyRes.setEncoding('utf8');
@@ -90,7 +135,7 @@ function fetchUpstream(req, res, upstreamPath) {
         res.send(rewritten);
       });
     } else {
-      // 非 HTML/CSS 资源直接管道传输
+      // 非 HTML/CSS 资源直接管道传输（可以是压缩的）
       proxyRes.pipe(res);
     }
 

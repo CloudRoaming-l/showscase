@@ -2,6 +2,8 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import https from 'https';
+import http from 'http';
 import { fileURLToPath } from 'url';
 import ScratchProject from '../models/ScratchProject.js';
 import ActivityLog from '../models/ActivityLog.js';

@@ -455,4 +455,176 @@ export const commentAPI = {
   delete: async (id) => api.delete(`/comments/${id}`)
 };
 
+// ==================== 硬件知识库 API ====================
+
+// 硬件知识库密码登录
+export const hardwareAPI = {
+  login: async (password) => {
+    const result = await api.post('/hardware/login', { password });
+    if (result.status === 'success' && result.token) {
+      localStorage.setItem('hw_kit_token', result.token);
+    }
+    return result;
+  },
+  hasAccess: () => {
+    return !!localStorage.getItem('hw_kit_token');
+  },
+  logout: () => {
+    localStorage.removeItem('hw_kit_token');
+  },
+  // 获取 token 用于 header
+  getToken: () => localStorage.getItem('hw_kit_token')
+};
+
+// 课程阶段 API
+export const stageAPI = {
+  getList: async () => {
+    const result = await api.get('/hardware/stages', {
+      headers: { 'x-hw-kit-token': hardwareAPI.getToken() }
+    });
+    return { ...result, data: normalizeList(result.data) };
+  },
+  getAdminList: async () => {
+    const result = await api.get('/hardware/stages/admin/all');
+    return { ...result, data: normalizeList(result.data) };
+  },
+  create: async (data) => {
+    const result = await api.post('/hardware/stages', data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  update: async (id, data) => {
+    const result = await api.put(`/hardware/stages/${id}`, data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  delete: async (id) => api.delete(`/hardware/stages/${id}`)
+};
+
+// 课件 API
+export const lessonAPI = {
+  getList: async (params = {}) => {
+    const result = await api.get('/hardware/lessons', {
+      params,
+      headers: { 'x-hw-kit-token': hardwareAPI.getToken() }
+    });
+    return {
+      ...result,
+      data: { ...result.data, list: normalizeList(result.data.list) }
+    };
+  },
+  getDetail: async (id) => {
+    const result = await api.get(`/hardware/lessons/${id}`, {
+      headers: { 'x-hw-kit-token': hardwareAPI.getToken() }
+    });
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  getAdminList: async (params = {}) => {
+    const result = await api.get('/hardware/lessons/admin/all', { params });
+    return {
+      ...result,
+      data: { ...result.data, list: normalizeList(result.data.list) }
+    };
+  },
+  getAdminDetail: async (id) => {
+    const result = await api.get(`/hardware/lessons/admin/${id}`);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  create: async (data) => {
+    const result = await api.post('/hardware/lessons', data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  update: async (id, data) => {
+    const result = await api.put(`/hardware/lessons/${id}`, data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  delete: async (id) => api.delete(`/hardware/lessons/${id}`)
+};
+
+// 器材分类 API
+export const toolCategoryAPI = {
+  getList: async () => {
+    const result = await api.get('/hardware/tool-categories', {
+      headers: { 'x-hw-kit-token': hardwareAPI.getToken() }
+    });
+    return { ...result, data: normalizeList(result.data) };
+  },
+  getAdminList: async () => {
+    const result = await api.get('/hardware/tool-categories/admin/all');
+    return { ...result, data: normalizeList(result.data) };
+  },
+  create: async (data) => {
+    const result = await api.post('/hardware/tool-categories', data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  update: async (id, data) => {
+    const result = await api.put(`/hardware/tool-categories/${id}`, data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  delete: async (id) => api.delete(`/hardware/tool-categories/${id}`)
+};
+
+// 器材档案 API
+export const toolAPI = {
+  getList: async (params = {}) => {
+    const result = await api.get('/hardware/tools', {
+      params,
+      headers: { 'x-hw-kit-token': hardwareAPI.getToken() }
+    });
+    return {
+      ...result,
+      data: { ...result.data, list: normalizeList(result.data.list) }
+    };
+  },
+  getDetail: async (id) => {
+    const result = await api.get(`/hardware/tools/${id}`, {
+      headers: { 'x-hw-kit-token': hardwareAPI.getToken() }
+    });
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  getAdminList: async (params = {}) => {
+    const result = await api.get('/hardware/tools/admin/all', { params });
+    return {
+      ...result,
+      data: { ...result.data, list: normalizeList(result.data.list) }
+    };
+  },
+  getAdminDetail: async (id) => {
+    const result = await api.get(`/hardware/tools/admin/${id}`);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  create: async (data) => {
+    const result = await api.post('/hardware/tools', data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  update: async (id, data) => {
+    const result = await api.put(`/hardware/tools/${id}`, data);
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  delete: async (id) => api.delete(`/hardware/tools/${id}`)
+};
+
+// 附件上传 API
+export const attachmentAPI = {
+  upload: async (file, relatedType = 'lesson', relatedId = null) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (relatedType) formData.append('relatedType', relatedType);
+    if (relatedId) formData.append('relatedId', relatedId);
+    const result = await api.post('/hardware/attachments/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return { ...result, data: normalizeItem(result.data) };
+  },
+  uploadMultiple: async (files, relatedType = 'lesson', relatedId = null) => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    if (relatedType) formData.append('relatedType', relatedType);
+    if (relatedId) formData.append('relatedId', relatedId);
+    const result = await api.post('/hardware/attachments/upload-multiple', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return { ...result, data: normalizeList(result.data) };
+  },
+  delete: async (id) => api.delete(`/hardware/attachments/${id}`)
+};
+
 export default api;

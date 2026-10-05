@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Image, Home, LayoutDashboard, Play } from 'lucide-react';
+import { Menu, X, Play, LayoutDashboard, Wrench } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function Header() {
@@ -7,12 +7,10 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
-  // 路由变化时自动关闭移动端菜单
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // 移动端菜单打开时锁定 body 滚动
   useEffect(() => {
     if (isMenuOpen) {
       const original = document.body.style.overflow;
@@ -23,7 +21,6 @@ export default function Header() {
     }
   }, [isMenuOpen]);
 
-  // 点击外部关闭移动端菜单 + Esc 关闭
   useEffect(() => {
     if (!isMenuOpen) return;
     const handleClick = (e) => {
@@ -41,19 +38,18 @@ export default function Header() {
     };
   }, [isMenuOpen]);
 
-  // 使用 rAF 节流，避免快速滚动时重复 setState
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 20);
+          setIsScrolled(window.scrollY > 10);
           ticking = false;
         });
         ticking = true;
       }
     };
-    setIsScrolled(window.scrollY > 20);
+    setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -63,9 +59,8 @@ export default function Header() {
   }, []);
 
   const navItems = [
-    { name: '首页', path: '/', icon: Home },
-    { name: '作品展示', path: '/gallery', icon: Image },
     { name: 'Scratch作品', path: '/scratch', icon: Play },
+    { name: '硬件知识库', path: '/hardware', icon: Wrench },
     { name: '大屏展示', path: '/showcase', icon: LayoutDashboard }
   ];
 
@@ -75,36 +70,37 @@ export default function Header() {
         data-header-root
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-gray-900/90 backdrop-blur-md shadow-lg border-b border-gray-800'
-            : 'bg-transparent'
+            ? 'bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200'
+            : 'bg-white/80 backdrop-blur-sm border-b border-gray-100'
         }`}
       >
         <nav className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg shadow-primary-500/20">
-                <Image size={20} className="text-white" />
+            <Link to="/scratch" className="flex items-center space-x-2">
+              <div className="w-9 h-9 rounded-lg bg-gray-900 flex items-center justify-center">
+                <Play size={16} className="text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
-                作品展示墙
+              <span className="text-lg font-semibold text-gray-900">
+                造物课堂
               </span>
             </Link>
 
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname === item.path ||
+                  (item.path !== '/scratch' && location.pathname.startsWith(item.path));
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center space-x-1 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-md text-sm transition-colors duration-200 ${
                       isActive
-                        ? 'bg-primary-500/20 text-primary-300'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                        ? 'bg-gray-100 text-gray-900 font-medium'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >
-                    <Icon size={18} />
+                    <Icon size={16} />
                     <span>{item.name}</span>
                   </Link>
                 );
@@ -114,29 +110,27 @@ export default function Header() {
             <button
               onClick={toggleMenu}
               aria-label={isMenuOpen ? '关闭菜单' : '打开菜单'}
-              className="md:hidden text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800/60 transition-all"
+              className="md:hidden text-gray-600 hover:text-gray-900 p-2 rounded-md hover:bg-gray-100 transition-colors"
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </nav>
       </header>
 
-      {/* 移动端下拉菜单（带遮罩 + 滑入动画） */}
+      {/* 移动端下拉菜单 */}
       <div
         className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${
           isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {/* 遮罩 */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
-        {/* 菜单面板 */}
+        <div className="absolute inset-0 bg-black/30" onClick={() => setIsMenuOpen(false)} />
         <div
-          className={`relative mt-[68px] mx-4 transition-transform duration-300 ${
-            isMenuOpen ? 'translate-y-0' : '-translate-y-4'
+          className={`relative mt-[60px] mx-4 transition-transform duration-300 ${
+            isMenuOpen ? 'translate-y-0' : '-translate-y-2'
           }`}
         >
-          <div className="card p-3 space-y-1">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-2 space-y-0.5">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -145,14 +139,14 @@ export default function Header() {
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  className={`flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm transition-colors duration-200 ${
                     isActive
-                      ? 'bg-primary-500/20 text-primary-300'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800/70'
+                      ? 'bg-gray-100 text-gray-900 font-medium'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
-                  <Icon size={18} />
-                  <span className="text-sm font-medium">{item.name}</span>
+                  <Icon size={16} />
+                  <span>{item.name}</span>
                 </Link>
               );
             })}

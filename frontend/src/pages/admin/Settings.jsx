@@ -177,7 +177,7 @@ function CategoryTab() {
               setShowAddForm((v) => !v);
               if (!showAddForm) resetAddForm();
             }}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium"
           >
             <Plus size={16} />
             <span>添加作品类型</span>
@@ -193,7 +193,7 @@ function CategoryTab() {
             onClick={() => setSubType(t.id)}
             className={`px-4 py-1.5 rounded-md text-sm transition-all ${
               subType === t.id
-                ? 'bg-primary-500/20 text-primary-400'
+                ? 'bg-gray-900 text-white'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -204,7 +204,7 @@ function CategoryTab() {
 
       {/* 添加表单（内联） */}
       {showAddForm && (
-        <div className="p-4 bg-gray-800/50 rounded-lg border border-primary-500/30">
+        <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-600">
           <div className="flex flex-col md:flex-row md:items-end gap-3">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-300 mb-1.5">作品类型名称</label>
@@ -213,7 +213,7 @@ function CategoryTab() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder={`请输入${subType === 'photo' ? '图片' : 'Scratch'}作品类型名称`}
-                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                 maxLength={30}
               />
             </div>
@@ -224,14 +224,14 @@ function CategoryTab() {
                 min={0}
                 value={newSort}
                 onChange={(e) => setNewSort(e.target.value)}
-                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
               />
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleAdd}
                 disabled={submitting}
-                className="flex items-center space-x-1.5 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center space-x-1.5 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium"
               >
                 <Save size={14} />
                 <span>保存</span>
@@ -275,7 +275,7 @@ function CategoryTab() {
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-gray-500"
                         maxLength={30}
                       />
                     </div>
@@ -286,7 +286,7 @@ function CategoryTab() {
                         min={0}
                         value={editSort}
                         onChange={(e) => setEditSort(e.target.value)}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-gray-500"
                       />
                     </div>
                     <div className="md:w-36">
@@ -294,7 +294,7 @@ function CategoryTab() {
                       <select
                         value={editStatus}
                         onChange={(e) => setEditStatus(e.target.value)}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-gray-500"
                       >
                         <option value="active">启用</option>
                         <option value="inactive">禁用</option>
@@ -304,7 +304,7 @@ function CategoryTab() {
                       <button
                         onClick={handleUpdate}
                         disabled={submitting}
-                        className="flex items-center space-x-1.5 px-3 py-2 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm"
+                        className="flex items-center space-x-1.5 px-3 py-2 bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white rounded-lg transition-colors text-sm"
                       >
                         <Save size={14} />
                         <span>保存</span>
@@ -331,7 +331,7 @@ function CategoryTab() {
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                           item.status === 'active'
-                            ? 'bg-green-500/15 text-green-300'
+                            ? 'bg-gray-700 text-gray-200'
                             : 'bg-gray-600/30 text-gray-400'
                         }`}
                       >
@@ -340,14 +340,14 @@ function CategoryTab() {
                       <div className="flex items-center space-x-1">
                         <button
                           onClick={() => startEdit(item)}
-                          className="p-1.5 text-gray-400 hover:text-primary-400 hover:bg-gray-700/50 rounded-md transition-colors"
+                          className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
                           title="编辑"
                         >
                           <Edit2 size={15} />
                         </button>
                         <button
                           onClick={() => handleDelete(item)}
-                          className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 rounded-md transition-colors"
+                          className="p-1.5 text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-md transition-colors"
                           title="删除"
                         >
                           <Trash2 size={15} />
@@ -500,7 +500,7 @@ function GroupTab() {
               setShowAddForm((v) => !v);
               if (!showAddForm) resetAddForm();
             }}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium shadow-sm shadow-primary-500/20"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm font-medium"
           >
             <Plus size={16} />
             <span>添加教学小组</span>
@@ -510,7 +510,7 @@ function GroupTab() {
 
       {/* 添加表单（内联） */}
       {showAddForm && (
-        <div className="p-4 bg-gray-800/50 rounded-lg border border-primary-500/30">
+        <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-600">
           <div className="flex flex-col md:flex-row md:items-end gap-3">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-300 mb-1.5">教学小组名称</label>
@@ -519,7 +519,7 @@ function GroupTab() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="请输入教学小组名称"
-                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                 maxLength={30}
               />
             </div>
@@ -530,14 +530,14 @@ function GroupTab() {
                 min={0}
                 value={newSort}
                 onChange={(e) => setNewSort(e.target.value)}
-                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
               />
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleAdd}
                 disabled={submitting}
-                className="flex items-center space-x-1.5 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center space-x-1.5 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium"
               >
                 <Save size={14} />
                 <span>保存</span>
@@ -581,7 +581,7 @@ function GroupTab() {
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-gray-500"
                         maxLength={30}
                       />
                     </div>
@@ -592,7 +592,7 @@ function GroupTab() {
                         min={0}
                         value={editSort}
                         onChange={(e) => setEditSort(e.target.value)}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-gray-500"
                       />
                     </div>
                     <div className="md:w-36">
@@ -600,7 +600,7 @@ function GroupTab() {
                       <select
                         value={editStatus}
                         onChange={(e) => setEditStatus(e.target.value)}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-gray-500"
                       >
                         <option value="active">启用</option>
                         <option value="inactive">禁用</option>
@@ -610,7 +610,7 @@ function GroupTab() {
                       <button
                         onClick={handleUpdate}
                         disabled={submitting}
-                        className="flex items-center space-x-1.5 px-3 py-2 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm"
+                        className="flex items-center space-x-1.5 px-3 py-2 bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white rounded-lg transition-colors text-sm"
                       >
                         <Save size={14} />
                         <span>保存</span>
@@ -637,7 +637,7 @@ function GroupTab() {
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                           item.status === 'active'
-                            ? 'bg-green-500/15 text-green-300'
+                            ? 'bg-gray-700 text-gray-200'
                             : 'bg-gray-600/30 text-gray-400'
                         }`}
                       >
@@ -646,14 +646,14 @@ function GroupTab() {
                       <div className="flex items-center space-x-1">
                         <button
                           onClick={() => startEdit(item)}
-                          className="p-1.5 text-gray-400 hover:text-primary-400 hover:bg-gray-700/50 rounded-md transition-colors"
+                          className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
                           title="编辑"
                         >
                           <Edit2 size={15} />
                         </button>
                         <button
                           onClick={() => handleDelete(item)}
-                          className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 rounded-md transition-colors"
+                          className="p-1.5 text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-md transition-colors"
                           title="删除"
                         >
                           <Trash2 size={15} />
@@ -730,7 +730,7 @@ export default function Settings() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
                       activeTab === tab.id
-                        ? 'bg-primary-500/20 text-primary-400'
+                        ? 'bg-gray-900 text-white'
                         : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                     }`}
                   >
@@ -756,7 +756,7 @@ export default function Settings() {
                         type="text"
                         value={settings.siteName}
                         onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                       />
                     </div>
                     <div>
@@ -765,7 +765,7 @@ export default function Settings() {
                         value={settings.siteDescription}
                         onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
                         rows={3}
-                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 resize-none"
+                        className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 resize-none"
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -775,7 +775,7 @@ export default function Settings() {
                           type="email"
                           value={settings.contactEmail}
                           onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
-                          className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                          className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                         />
                       </div>
                       <div>
@@ -784,7 +784,7 @@ export default function Settings() {
                           type="text"
                           value={settings.contactPhone}
                           onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
-                          className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                          className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                         />
                       </div>
                     </div>
@@ -809,7 +809,7 @@ export default function Settings() {
                         onChange={(e) => setSettings({ ...settings, notificationEmail: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-500"></div>
+                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-500"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
@@ -824,7 +824,7 @@ export default function Settings() {
                         onChange={(e) => setSettings({ ...settings, notificationAdmin: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-500"></div>
+                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-500"></div>
                     </label>
                   </div>
                 </div>
@@ -847,7 +847,7 @@ export default function Settings() {
                         onChange={(e) => setSettings({ ...settings, allowRegistration: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-500"></div>
+                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-500"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
@@ -862,7 +862,7 @@ export default function Settings() {
                         onChange={(e) => setSettings({ ...settings, requireApproval: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-500"></div>
+                      <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-500"></div>
                     </label>
                   </div>
                 </div>
@@ -919,7 +919,7 @@ export default function Settings() {
               <div className="mt-8 pt-5 border-t border-gray-700/50">
                 <button
                   onClick={handleSave}
-                  className="flex items-center space-x-2 px-4 py-2.5 font-medium rounded-lg transition-all bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm shadow-sm shadow-primary-500/20"
+                  className="flex items-center space-x-2 px-4 py-2.5 font-medium rounded-lg transition-colors bg-gray-900 hover:bg-gray-800 text-white text-sm"
                 >
                   <Save size={14} />
                   <span>保存设置</span>

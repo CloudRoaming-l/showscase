@@ -97,56 +97,56 @@ export default function Dashboard() {
       label: '作品总数',
       value: stats.totalPhotos,
       icon: Image,
-      color: 'from-purple-500 to-pink-500',
-      bg: 'bg-purple-500/10',
-      border: 'border-purple-500/20'
+      color: 'bg-gray-700',
+      bg: 'bg-gray-800/50',
+      border: 'border-gray-700'
     },
     {
       label: '学生人数',
       value: stats.totalStudents,
       icon: Users,
-      color: 'from-blue-500 to-cyan-500',
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/20'
+      color: 'bg-gray-700',
+      bg: 'bg-gray-800/50',
+      border: 'border-gray-700'
     },
     {
       label: '待审核',
       value: stats.pending,
       icon: AlertCircle,
-      color: 'from-amber-500 to-orange-500',
-      bg: 'bg-amber-500/10',
-      border: 'border-amber-500/20',
+      color: 'bg-gray-600',
+      bg: 'bg-gray-800/50',
+      border: 'border-gray-700',
       highlight: stats.pending > 0
     },
     {
       label: '精选作品',
       value: stats.featured,
       icon: Award,
-      color: 'from-emerald-500 to-teal-500',
-      bg: 'bg-emerald-500/10',
-      border: 'border-emerald-500/20'
+      color: 'bg-gray-700',
+      bg: 'bg-gray-800/50',
+      border: 'border-gray-700'
     }
   ], [stats]);
 
   const statusBadge = (status) => {
     if (status === 'pending')
       return (
-        <span className="inline-flex items-center gap-1 text-xs text-amber-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+        <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse" />
           待审核
         </span>
       );
     if (status === 'approved')
       return (
-        <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        <span className="inline-flex items-center gap-1 text-xs text-gray-900">
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
           已通过
         </span>
       );
     if (status === 'rejected')
       return (
-        <span className="inline-flex items-center gap-1 text-xs text-red-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+        <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
           已拒绝
         </span>
       );
@@ -165,10 +165,10 @@ export default function Dashboard() {
             return (
               <div
                 key={index}
-                className={`card p-5 ${stat.bg} border ${stat.border} ${stat.highlight ? 'ring-2 ring-amber-500/20' : ''}`}
+                className={`card p-5 ${stat.bg} border ${stat.border} ${stat.highlight ? 'ring-2 ring-gray-500/30' : ''}`}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-sm`}>
+                  <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center`}>
                     <Icon size={18} className="text-white" />
                   </div>
                 </div>
@@ -187,7 +187,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-base font-semibold text-white flex items-center gap-2">
-                  <TrendingUp size={18} className="text-accent-400" />
+                  <TrendingUp size={18} className="text-gray-400" />
                   作品状态分布
                 </h2>
                 <p className="text-gray-500 text-xs mt-0.5">
@@ -198,17 +198,17 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-4 mb-4">
               <div className="flex items-center gap-1.5 text-xs">
-                <CheckCircle2 size={14} className="text-emerald-400" />
+                <CheckCircle2 size={14} className="text-gray-300" />
                 <span className="text-gray-400">已通过</span>
                 <span className="text-white font-medium">{stats.approved}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
-                <AlertCircle size={14} className="text-amber-400" />
+                <AlertCircle size={14} className="text-gray-400" />
                 <span className="text-gray-400">待审核</span>
                 <span className="text-white font-medium">{stats.pending}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
-                <XCircle size={14} className="text-red-400" />
+                <XCircle size={14} className="text-gray-500" />
                 <span className="text-gray-400">已拒绝</span>
                 <span className="text-white font-medium">{stats.rejected}</span>
               </div>
@@ -217,19 +217,19 @@ export default function Dashboard() {
             <div className="h-3 bg-gray-800 rounded-full overflow-hidden flex">
               {stats.approved > 0 && (
                 <div
-                  className="bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
+                  className="bg-gray-300 transition-all duration-500"
                   style={{ width: `${(stats.approved / totalForStatusBar) * 100}%` }}
                 />
               )}
               {stats.pending > 0 && (
                 <div
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500"
+                  className="bg-gray-500 transition-all duration-500"
                   style={{ width: `${(stats.pending / totalForStatusBar) * 100}%` }}
                 />
               )}
               {stats.rejected > 0 && (
                 <div
-                  className="bg-gradient-to-r from-red-500 to-rose-500 transition-all duration-500"
+                  className="bg-gray-600 transition-all duration-500"
                   style={{ width: `${(stats.rejected / totalForStatusBar) * 100}%` }}
                 />
               )}
@@ -270,7 +270,7 @@ export default function Dashboard() {
                     key={photo.id}
                     className="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg hover:bg-gray-800/50 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0">
                       <Image size={16} className="text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -318,7 +318,7 @@ export default function Dashboard() {
                     </div>
                     <div className="h-1.5 bg-gray-700/50 rounded-full overflow-hidden">
                       <div
-                        className={`h-full bg-gradient-to-r ${cat.color} rounded-full transition-all duration-500`}
+                        className={`h-full bg-gray-400 rounded-full transition-all duration-500`}
                         style={{ width: `${cat.percentage}%` }}
                       />
                     </div>

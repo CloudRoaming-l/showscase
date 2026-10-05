@@ -14,7 +14,11 @@ import {
   ExternalLink,
   Home,
   LayoutDashboard as DashboardIcon,
-  UserCog
+  UserCog,
+  BookOpen,
+  Wrench,
+  Layers,
+  FolderKanban
 } from 'lucide-react';
 import { Link, useLocation, Navigate } from 'react-router-dom';
 import { useToast } from '../common/Toast.jsx';
@@ -49,13 +53,17 @@ export default function AdminLayout({ children }) {
   const isAdmin = currentUser?.role === 'admin';
 
   const navItems = [
-    { name: '仪表盘', path: '/admin', icon: LayoutDashboard },
-    { name: '作品管理', path: '/admin/photos', icon: Image },
-    { name: 'Scratch作品', path: '/admin/scratch', icon: Play },
-    { name: '学生管理', path: '/admin/students', icon: Users },
-    ...(isAdmin ? [{ name: '账号管理', path: '/admin/users', icon: UserCog }] : []),
-    ...(isAdmin ? [{ name: '操作日志', path: '/admin/activity-logs', icon: Clock }] : []),
-    { name: '系统设置', path: '/admin/settings', icon: Settings }
+    { name: '仪表盘', path: '/admin', icon: LayoutDashboard, group: '概览' },
+    { name: '作品管理', path: '/admin/photos', icon: Image, group: '作品展示' },
+    { name: 'Scratch作品', path: '/admin/scratch', icon: Play, group: '作品展示' },
+    { name: '学生管理', path: '/admin/students', icon: Users, group: '作品展示' },
+    { name: '课件管理', path: '/admin/lessons', icon: BookOpen, group: '硬件知识库' },
+    { name: '课程阶段', path: '/admin/stages', icon: Layers, group: '硬件知识库' },
+    { name: '器材管理', path: '/admin/tools', icon: Wrench, group: '硬件知识库' },
+    { name: '器材分类', path: '/admin/tool-categories', icon: FolderKanban, group: '硬件知识库' },
+    ...(isAdmin ? [{ name: '账号管理', path: '/admin/users', icon: UserCog, group: '系统' }] : []),
+    ...(isAdmin ? [{ name: '操作日志', path: '/admin/activity-logs', icon: Clock, group: '系统' }] : []),
+    { name: '系统设置', path: '/admin/settings', icon: Settings, group: '系统' }
   ];
 
   const currentItem = navItems.find((item) => location.pathname.startsWith(item.path)) || navItems[0];
@@ -83,7 +91,7 @@ export default function AdminLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex">
+    <div className="admin-app min-h-screen bg-gray-900 flex">
       <aside
         className={`fixed left-0 top-0 h-full bg-gray-800 border-r border-gray-700 transition-all duration-300 z-50 ${
           sidebarOpen ? 'w-64' : 'w-16'
@@ -92,7 +100,7 @@ export default function AdminLayout({ children }) {
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
           {sidebarOpen && (
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg shadow-primary-500/20">
+              <div className="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center">
                 <Sparkles size={16} className="text-white" />
               </div>
               <span className="font-bold text-white">管理后台</span>
@@ -106,24 +114,39 @@ export default function AdminLayout({ children }) {
           </button>
         </div>
 
-        <nav className="p-3 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path ||
-              (item.path !== '/admin' && location.pathname.startsWith(item.path));
+        <nav className="p-3 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+          {['概览', '作品展示', '硬件知识库', '系统'].map((groupName) => {
+            const groupItems = navItems.filter(item => item.group === groupName);
+            if (groupItems.length === 0) return null;
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                  isActive
-                    ? 'bg-primary-500/20 text-primary-400 shadow-sm shadow-primary-500/10 border border-primary-500/20'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50 border border-transparent'
-                }`}
-              >
-                <Icon size={18} className="flex-shrink-0" />
-                {sidebarOpen && <span className="text-sm">{item.name}</span>}
-              </Link>
+              <div key={groupName}>
+                {sidebarOpen && (
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wider px-3 mb-2">
+                    {groupName}
+                  </div>
+                )}
+                <div className="space-y-1">
+                  {groupItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.path ||
+                      (item.path !== '/admin' && location.pathname.startsWith(item.path));
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                          isActive
+                            ? 'bg-gray-900 text-white border border-gray-700'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-700/50 border border-transparent'
+                        }`}
+                      >
+                        <Icon size={18} className="flex-shrink-0" />
+                        {sidebarOpen && <span className="text-sm">{item.name}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>
@@ -131,7 +154,7 @@ export default function AdminLayout({ children }) {
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-700">
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 border border-transparent hover:border-red-500/20 ${
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-gray-200 hover:bg-gray-700/50 transition-all duration-200 border border-transparent hover:border-gray-600 ${
               sidebarOpen ? '' : 'justify-center'
             }`}
           >
@@ -156,7 +179,7 @@ export default function AdminLayout({ children }) {
               <Link
                 to="/"
                 target="_blank"
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-primary-500 transition-all text-sm"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 transition-all text-sm"
                 title="返回首页"
               >
                 <Home size={16} />
@@ -165,7 +188,7 @@ export default function AdminLayout({ children }) {
               <Link
                 to="/showcase"
                 target="_blank"
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-accent-500 transition-all text-sm"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 transition-all text-sm"
                 title="大屏展示"
               >
                 <DashboardIcon size={16} />
@@ -174,7 +197,7 @@ export default function AdminLayout({ children }) {
               <Link
                 to="/gallery"
                 target="_blank"
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-green-500 transition-all text-sm"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 transition-all text-sm"
                 title="作品列表"
               >
                 <ExternalLink size={16} />
@@ -183,14 +206,14 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-sm shadow-primary-500/20">
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
                 <Users size={16} className="text-white" />
               </div>
               <span className="text-gray-400 text-sm hidden md:block">
                 {currentUser?.name || currentUser?.username || '管理员'}
               </span>
               {isAdmin && (
-                <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">
+                <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">
                   管理员
                 </span>
               )}

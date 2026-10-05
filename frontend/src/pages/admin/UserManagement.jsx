@@ -215,14 +215,14 @@ export default function UserManagement() {
 
   const getRoleBadgeClass = (role) => {
     return role === 'admin'
-      ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
-      : 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      ? 'bg-gray-700/50 text-gray-300 border-gray-600'
+      : 'bg-gray-700/50 text-gray-300 border-gray-600';
   };
 
   const getStatusBadgeClass = (status) => {
     return status === 'active'
-      ? 'bg-green-500/20 text-green-400 border-green-500/30'
-      : 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      ? 'bg-gray-700 text-gray-200 border-gray-600'
+      : 'bg-gray-800/50 text-gray-500 border-gray-700';
   };
 
   const stats = {
@@ -242,8 +242,8 @@ export default function UserManagement() {
                 <p className="text-gray-400 text-sm">总账号数</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
-                <UserCog size={20} className="text-primary-400" />
+              <div className="w-10 h-10 rounded-lg bg-gray-700/50 flex items-center justify-center">
+                <UserCog size={20} className="text-white" />
               </div>
             </div>
           </div>
@@ -253,8 +253,8 @@ export default function UserManagement() {
                 <p className="text-gray-400 text-sm">管理员</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats.admin}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <Shield size={20} className="text-purple-400" />
+              <div className="w-10 h-10 rounded-lg bg-gray-700/50 flex items-center justify-center">
+                <Shield size={20} className="text-gray-300" />
               </div>
             </div>
           </div>
@@ -264,8 +264,8 @@ export default function UserManagement() {
                 <p className="text-gray-400 text-sm">教师账号</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats.teacher}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <UserCheck size={20} className="text-blue-400" />
+              <div className="w-10 h-10 rounded-lg bg-gray-700/50 flex items-center justify-center">
+                <UserCheck size={20} className="text-gray-300" />
               </div>
             </div>
           </div>
@@ -275,8 +275,8 @@ export default function UserManagement() {
                 <p className="text-gray-400 text-sm">已启用</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats.active}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <UserCheck size={20} className="text-green-400" />
+              <div className="w-10 h-10 rounded-lg bg-gray-700/50 flex items-center justify-center">
+                <UserCheck size={20} className="text-gray-300" />
               </div>
             </div>
           </div>
@@ -292,13 +292,13 @@ export default function UserManagement() {
                   placeholder="搜索用户名或姓名..."
                   value={searchTerm}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-64 pl-9 pr-4 py-2 bg-gray-800/60 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-64 pl-9 pr-4 py-2 bg-gray-800/60 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gray-500"
                 />
               </div>
               <select
                 value={roleFilter}
                 onChange={(e) => handleRoleFilterChange(e.target.value)}
-                className="px-3 py-2 bg-gray-800/60 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+                className="px-3 py-2 bg-gray-800/60 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gray-500"
               >
                 <option value="">全部角色</option>
                 <option value="admin">管理员</option>
@@ -315,7 +315,7 @@ export default function UserManagement() {
               </button>
               <button
                 onClick={handleAdd}
-                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all text-sm shadow-sm shadow-primary-500/20"
+                className="flex items-center gap-1.5 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm"
               >
                 <Plus size={14} />
                 <span>添加用户</span>
@@ -357,7 +357,7 @@ export default function UserManagement() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
                             <span className="text-white text-xs font-medium">
                               {(user.name || user.username).charAt(0).toUpperCase()}
                             </span>
@@ -394,7 +394,7 @@ export default function UserManagement() {
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => setPasswordModal(user)}
-                            className="p-1.5 text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
                             title="重置密码"
                           >
                             <KeyRound size={14} />
@@ -403,8 +403,8 @@ export default function UserManagement() {
                             onClick={() => toggleStatus(user)}
                             className={`p-1.5 rounded-lg transition-colors ${
                               user.status === 'active'
-                                ? 'text-gray-400 hover:text-orange-400 hover:bg-orange-500/10'
-                                : 'text-gray-400 hover:text-green-400 hover:bg-green-500/10'
+                                ? 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                             }`}
                             title={user.status === 'active' ? '停用账号' : '启用账号'}
                           >
@@ -412,7 +412,7 @@ export default function UserManagement() {
                           </button>
                           <button
                             onClick={() => handleEdit(user)}
-                            className="p-1.5 text-gray-400 hover:text-primary-400 hover:bg-primary-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
                             title="编辑"
                           >
                             <Edit size={14} />
@@ -420,7 +420,7 @@ export default function UserManagement() {
                           <button
                             onClick={() => setDeleteConfirm(user)}
                             disabled={user.username === 'admin'}
-                            className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="p-1.5 text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title="删除"
                           >
                             <Trash2 size={14} />
@@ -468,7 +468,7 @@ export default function UserManagement() {
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   disabled={modalMode === 'edit'}
-                  className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 ${
+                  className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 ${
                     errors.username ? 'border-red-500' : 'border-gray-700'
                   } ${modalMode === 'edit' ? 'opacity-60 cursor-not-allowed' : ''}`}
                   placeholder="请输入用户名"
@@ -484,7 +484,7 @@ export default function UserManagement() {
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 ${
+                    className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 ${
                       errors.password ? 'border-red-500' : 'border-gray-700'
                     }`}
                     placeholder="请输入密码（至少6位）"
@@ -500,7 +500,7 @@ export default function UserManagement() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500 ${
+                  className={`w-full bg-gray-800/60 border rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500 ${
                     errors.name ? 'border-red-500' : 'border-gray-700'
                   }`}
                   placeholder="请输入姓名"
@@ -512,7 +512,7 @@ export default function UserManagement() {
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                 >
                   <option value="teacher">教师</option>
                   <option value="admin">管理员</option>
@@ -523,7 +523,7 @@ export default function UserManagement() {
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                 >
                   <option value="active">启用</option>
                   <option value="inactive">停用</option>
@@ -539,7 +539,7 @@ export default function UserManagement() {
               </button>
               <button
                 onClick={handleSave}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all text-sm shadow-sm shadow-primary-500/20"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm"
               >
                 <Save size={14} />
                 <span>保存</span>
@@ -576,7 +576,7 @@ export default function UserManagement() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-full bg-gray-800/60 border border-gray-700 rounded-lg py-2.5 px-3.5 text-white text-sm focus:outline-none focus:border-gray-500"
                   placeholder="请输入新密码（至少6位）"
                 />
               </div>
@@ -593,7 +593,7 @@ export default function UserManagement() {
               </button>
               <button
                 onClick={handleResetPassword}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all text-sm shadow-sm shadow-primary-500/20"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors text-sm"
               >
                 <KeyRound size={14} />
                 <span>确认重置</span>
